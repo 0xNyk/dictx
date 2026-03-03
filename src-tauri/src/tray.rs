@@ -55,7 +55,7 @@ pub fn get_icon_path(theme: AppTheme, state: TrayIconState) -> &'static str {
         (AppTheme::Light, TrayIconState::Recording) => "resources/tray_recording_dark.png",
         (AppTheme::Light, TrayIconState::Transcribing) => "resources/tray_transcribing_dark.png",
         // Colored theme uses pink icons (for Linux)
-        (AppTheme::Colored, TrayIconState::Idle) => "resources/handy.png",
+        (AppTheme::Colored, TrayIconState::Idle) => "resources/dictx.png",
         (AppTheme::Colored, TrayIconState::Recording) => "resources/recording.png",
         (AppTheme::Colored, TrayIconState::Transcribing) => "resources/transcribing.png",
     }
@@ -94,9 +94,9 @@ pub fn update_tray_menu(app: &AppHandle, state: &TrayIconState, locale: Option<&
 
     // Create common menu items
     let version_label = if cfg!(debug_assertions) {
-        format!("Handy v{} (Dev)", env!("CARGO_PKG_VERSION"))
+        format!("Dictx v{} (Dev)", env!("CARGO_PKG_VERSION"))
     } else {
-        format!("Handy v{}", env!("CARGO_PKG_VERSION"))
+        format!("Dictx v{}", env!("CARGO_PKG_VERSION"))
     };
     let version_i = MenuItem::with_id(app, "version", &version_label, false, None::<&str>)
         .expect("failed to create version item");
@@ -158,21 +158,47 @@ pub fn update_tray_menu(app: &AppHandle, state: &TrayIconState, locale: Option<&
             )
             .expect("failed to create menu")
         }
-        TrayIconState::Idle => Menu::with_items(
-            app,
-            &[
-                &version_i,
-                &separator(),
-                &copy_last_transcript_i,
-                &unload_model_i,
-                &separator(),
-                &settings_i,
-                &check_updates_i,
-                &separator(),
-                &quit_i,
-            ],
-        )
-        .expect("failed to create menu"),
+        TrayIconState::Idle => {
+            // Build the "Start Dictation (shortcut)" label with the current binding
+            let shortcut_label = {
+                let bindings = settings.bindings.clone();
+                let binding_str = bindings
+                    .get("transcribe")
+                    .map(|b| b.current_binding.as_str())
+                    .unwrap_or("");
+                if binding_str.is_empty() {
+                    strings.start_dictation.clone()
+                } else {
+                    format!("{} ({})", strings.start_dictation, binding_str)
+                }
+            };
+            let start_dictation_i = MenuItem::with_id(
+                app,
+                "start_dictation",
+                &shortcut_label,
+                true,
+                None::<&str>,
+            )
+            .expect("failed to create start dictation item");
+
+            Menu::with_items(
+                app,
+                &[
+                    &version_i,
+                    &separator(),
+                    &start_dictation_i,
+                    &separator(),
+                    &copy_last_transcript_i,
+                    &unload_model_i,
+                    &separator(),
+                    &settings_i,
+                    &check_updates_i,
+                    &separator(),
+                    &quit_i,
+                ],
+            )
+            .expect("failed to create menu")
+        }
     };
 
     let tray = app.state::<TrayIcon>();
@@ -226,7 +252,7 @@ mod tests {
     fn build_entry(transcription: &str, post_processed: Option<&str>) -> HistoryEntry {
         HistoryEntry {
             id: 1,
-            file_name: "handy-1.wav".to_string(),
+            file_name: "dictx-1.wav".to_string(),
             timestamp: 0,
             saved: false,
             title: "Recording".to_string(),

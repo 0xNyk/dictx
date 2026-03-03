@@ -1,10 +1,12 @@
-# Contributing to Handy
+# Contributing to Dictx
 
-Thank you for your interest in contributing to Handy! This guide will help you get started with contributing to this open source speech-to-text application.
+Thank you for your interest in contributing to Dictx! This guide will help you get started with contributing to this open source speech-to-text application.
+
+> **Note:** Dictx is a fork of [Handy](https://github.com/cjpais/Handy). Some links below reference the upstream project.
 
 ## 📖 Philosophy
 
-Handy aims to be the most forkable speech-to-text app. The goal is to create both a useful tool and a foundation for others to build upon—a well-patterned, simple codebase that serves the community. We prioritize:
+Dictx aims to be a privacy-focused, extensible speech-to-text tool with Obsidian integration. We prioritize:
 
 - **Simplicity**: Clear, maintainable code over clever solutions
 - **Extensibility**: Make it easy for others to fork and customize
@@ -28,14 +30,14 @@ Before you begin, ensure you have the following installed:
 2. **Clone your fork**:
 
    ```bash
-   git clone git@github.com:YOUR_USERNAME/Handy.git
-   cd Handy
+   git clone git@github.com:YOUR_USERNAME/dictx.git
+   cd dictx
    ```
 
 3. **Add upstream remote**:
 
    ```bash
-   git remote add upstream git@github.com:cjpais/Handy.git
+   git remote add upstream git@github.com:0xNyk/dictx.git
    ```
 
 4. **Install dependencies**:
@@ -62,7 +64,7 @@ For detailed platform-specific setup instructions, see [BUILD.md](BUILD.md).
 
 ### Understanding the Codebase
 
-Handy follows a clean architecture pattern:
+Dictx follows a clean architecture pattern:
 
 **Backend (Rust - `src-tauri/src/`):**
 
@@ -133,7 +135,7 @@ We use GitHub Discussions for feature requests rather than issues. This keeps is
    - The problem you're trying to solve
    - Your proposed solution
    - Any alternatives you've considered
-   - How it fits with Handy's philosophy
+   - How it fits with Dictx's philosophy
 
 ## 🔧 Making Code Contributions
 
@@ -152,9 +154,7 @@ We use GitHub Discussions for feature requests rather than issues. This keeps is
    - Gather community feedback first via [Discussions](https://github.com/cjpais/Handy/discussions)
    - Link to that discussion in your PR
 
-3. **Get community feedback for features** - PRs with demonstrated community interest are **much more likely to be merged**. Start a discussion, get feedback, and link to it in your PR. This helps ensure Handy stays focused and useful for the most people without becoming bloated.
-
-Community feedback is essential to keeping Handy the best it can be for everyone. It helps prioritize what matters most and prevents feature creep.
+3. **Get community feedback for features** - PRs with demonstrated community interest are **much more likely to be merged**. Start a discussion, get feedback, and link to it in your PR. This helps ensure Dictx stays focused and useful without becoming bloated.
 
 ### Development Workflow
 
@@ -209,7 +209,7 @@ Community feedback is essential to keeping Handy the best it can be for everyone
    ```
 
 7. **Create a Pull Request**:
-   - Go to the [Handy repository](https://github.com/cjpais/Handy)
+   - Go to the [Dictx repository](https://github.com/0xNyk/dictx)
    - Click "New Pull Request"
    - Select your fork and branch
    - Fill out the PR template completely, including:
@@ -220,7 +220,7 @@ Community feedback is essential to keeping Handy the best it can be for everyone
      - Screenshots/videos if applicable
      - Breaking changes (if any)
 
-   **Remember:** PRs with community support are prioritized. If you haven't already, start a [discussion](https://github.com/cjpais/Handy/discussions) to gather feedback before or alongside your PR. It is not explicitly required to gather feedback, but it certainly helps your PR get merged faster.
+   **Remember:** PRs with community support are prioritized.
 
 ### AI Assistance Disclosure
 
@@ -305,12 +305,10 @@ Look for issues labeled `good first issue` or `help wanted` if you're new to the
 
 - **Discord**: Join our [Discord community](https://discord.com/invite/WVBeWsNXK4)
 - **Discussions**: Ask questions in [GitHub Discussions](https://github.com/cjpais/Handy/discussions)
-- **Email**: Reach out at [contact@handy.computer](mailto:contact@handy.computer)
-
 ## 📜 License
 
-By contributing to Handy, you agree that your contributions will be licensed under the MIT License. See [LICENSE](LICENSE) for details.
+By contributing to Dictx, you agree that your contributions will be licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
 ---
 
-**Thank you for contributing to Handy!** Your efforts help make speech-to-text technology more accessible, private, and extensible for everyone.
+**Thank you for contributing to Dictx!**

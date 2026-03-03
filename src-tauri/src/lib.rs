@@ -10,6 +10,7 @@ mod helpers;
 mod input;
 mod llm_client;
 mod managers;
+mod obsidian_export;
 mod overlay;
 mod settings;
 mod shortcut;
@@ -192,6 +193,9 @@ fn initialize_core_logic(app_handle: &AppHandle) {
                     Err(e) => log::error!("Failed to unload model via tray: {}", e),
                 }
             }
+            "start_dictation" => {
+                signal_handle::send_transcription_input(app, "transcribe", "tray");
+            }
             "cancel" => {
                 use crate::utils::cancel_current_operation;
 
@@ -298,6 +302,10 @@ pub fn run(cli_args: CliArgs) {
         shortcut::change_keyboard_implementation_setting,
         shortcut::get_keyboard_implementation,
         shortcut::change_show_tray_icon_setting,
+        shortcut::change_obsidian_export_enabled_setting,
+        shortcut::change_obsidian_vault_path_setting,
+        shortcut::change_obsidian_export_subfolder_setting,
+        shortcut::change_obsidian_append_to_daily_setting,
         shortcut::handy_keys::start_handy_keys_recording,
         shortcut::handy_keys::stop_handy_keys_recording,
         trigger_update_check,
@@ -374,7 +382,7 @@ pub fn run(cli_args: CliArgs) {
                     }),
                     // File logs respect the user's settings (stored in FILE_LOG_LEVEL atomic)
                     Target::new(TargetKind::LogDir {
-                        file_name: Some("handy".into()),
+                        file_name: Some("dictx".into()),
                     })
                     .filter(|metadata| {
                         let file_level = FILE_LOG_LEVEL.load(Ordering::Relaxed);

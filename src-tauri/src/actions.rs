@@ -486,6 +486,27 @@ impl ShortcutAction for TranscribeAction {
                                 }
                             });
 
+                            // Export to Obsidian vault (non-blocking)
+                            {
+                                let ah_obsidian = ah.clone();
+                                let raw_for_obsidian = transcription.clone();
+                                let final_for_obsidian = final_text.clone();
+                                let duration = stop_time.elapsed().as_secs_f64();
+                                std::thread::spawn(move || {
+                                    let post_proc = if final_for_obsidian != raw_for_obsidian {
+                                        Some(final_for_obsidian.as_str())
+                                    } else {
+                                        None
+                                    };
+                                    crate::obsidian_export::export_to_obsidian(
+                                        &ah_obsidian,
+                                        &raw_for_obsidian,
+                                        post_proc,
+                                        Some(duration),
+                                    );
+                                });
+                            }
+
                             // Paste the final text (either processed or original)
                             let ah_clone = ah.clone();
                             let paste_time = Instant::now();

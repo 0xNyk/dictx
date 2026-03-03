@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Handy",
-  "version": "0.7.9",
-  "identifier": "com.pais.handy",
+  "productName": "Dictx",
+  "version": "0.1.0",
+  "identifier": "com.0xnyk.dictx",
   "build": {
     "beforeDevCommand": "bun run dev",
     "devUrl": "http://localhost:1420",
@@ -14,14 +14,14 @@
     "windows": [
       {
         "label": "main",
-        "title": "Handy",
+        "title": "Dictx",
         "width": 680,
         "height": 570,
         "minWidth": 680,
         "minHeight": 570,
         "resizable": true,
         "maximizable": false,
-        "visible": false
+        "visible": true
       }
     ],
     "security": {
@@ -37,7 +37,7 @@
   },
   "bundle": {
     "active": true,
-    "createUpdaterArtifacts": true,
+    "createUpdaterArtifacts": false,
     "targets": "all",
     "resources": ["resources/**/*"],
     "license": "MIT",
@@ -69,16 +69,12 @@
         "files": {}
       }
     },
-    "windows": {
-      "signCommand": "trusted-signing-cli -e https://eus.codesigning.azure.net/ -a CJ-Signing -c cjpais-dev -d Handy %1"
-    }
+    "windows": {}
   },
   "plugins": {
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEJBQjcyMDk1MjA2NjAxRjkKUldUNUFXWWdsU0MzdXRRZi8zYzhqV2FaNUVDbDd2Rk5VM1IvWWowVXdmRFNKQ1BrMXF5RFFsLy8K",
-      "endpoints": [
-        "https://github.com/cjpais/Handy/releases/latest/download/latest.json"
-      ]
+      "endpoints": [],
+      "pubkey": ""
     }
   }
 }

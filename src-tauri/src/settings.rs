@@ -360,6 +360,14 @@ pub struct AppSettings {
     #[serde(default = "default_typing_tool")]
     pub typing_tool: TypingTool,
     pub external_script_path: Option<String>,
+    #[serde(default)]
+    pub obsidian_export_enabled: bool,
+    #[serde(default)]
+    pub obsidian_vault_path: Option<String>,
+    #[serde(default = "default_obsidian_export_subfolder")]
+    pub obsidian_export_subfolder: Option<String>,
+    #[serde(default)]
+    pub obsidian_append_to_daily: bool,
 }
 
 fn default_model() -> String {
@@ -570,6 +578,10 @@ fn default_typing_tool() -> TypingTool {
     TypingTool::Auto
 }
 
+fn default_obsidian_export_subfolder() -> Option<String> {
+    Some("voice-notes".to_string())
+}
+
 fn ensure_post_process_defaults(settings: &mut AppSettings) -> bool {
     let mut changed = false;
     for provider in default_post_process_providers() {
@@ -724,6 +736,10 @@ pub fn get_default_settings() -> AppSettings {
         paste_delay_ms: default_paste_delay_ms(),
         typing_tool: default_typing_tool(),
         external_script_path: None,
+        obsidian_export_enabled: false,
+        obsidian_vault_path: None,
+        obsidian_export_subfolder: default_obsidian_export_subfolder(),
+        obsidian_append_to_daily: false,
     }
 }
 

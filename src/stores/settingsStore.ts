@@ -135,6 +135,14 @@ const settingUpdaters: {
     commands.changeExperimentalEnabledSetting(value as boolean),
   show_tray_icon: (value) =>
     commands.changeShowTrayIconSetting(value as boolean),
+  obsidian_export_enabled: (value) =>
+    commands.changeObsidianExportEnabledSetting(value as boolean),
+  obsidian_vault_path: (value) =>
+    commands.changeObsidianVaultPathSetting((value as string) ?? ""),
+  obsidian_export_subfolder: (value) =>
+    commands.changeObsidianExportSubfolderSetting((value as string) ?? "voice-notes"),
+  obsidian_append_to_daily: (value) =>
+    commands.changeObsidianAppendToDailySetting(value as boolean),
 };
 
 export const useSettingsStore = create<SettingsStore>()(

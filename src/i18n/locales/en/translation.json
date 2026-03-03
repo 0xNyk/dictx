@@ -457,7 +457,9 @@
       },
       "updateChecks": {
         "label": "Check for Updates",
-        "description": "Automatically check for new versions of Dictx"
+        "description": "Automatically check for new versions of Dictx",
+        "proRequired": "Auto-updates are available for active Dictx Pro installations.",
+        "upgrade": "Activate or Upgrade Pro"
       },
       "soundTheme": {
         "label": "Sound Theme",
@@ -536,6 +538,17 @@
         "title": "Upgrade to Dictx Pro",
         "description": "One-time purchase for signed builds, in-app auto-updates, and priority support.",
         "button": "Upgrade Now"
+      },
+      "proActivation": {
+        "active": "Dictx Pro is active on this device.",
+        "inactive": "Dictx Pro is not active. Enter your purchase email and checkout ID to activate updater entitlement.",
+        "activate": "Activate Dictx Pro",
+        "refresh": "Re-check Entitlement",
+        "clear": "Remove Activation",
+        "email": "Email",
+        "checkoutId": "Checkout ID",
+        "emailPlaceholder": "Purchase email",
+        "checkoutIdPlaceholder": "polar_cl_..."
       },
       "acknowledgments": {
         "title": "Acknowledgments",

@@ -16,4 +16,11 @@ Attach `dictx.splitlabs.io` to this Vercel project.
 ## Routes
 
 - `/` serves `landing/index.html`
-- `/buy` redirects to `https://buy.splitlabs.io`
+- `/buy` redirects to Polar checkout
+- `/api/pro/verify` validates a Polar checkout/email pair for in-app Pro activation
+
+## Environment Variables (Vercel)
+
+- `POLAR_ACCESS_TOKEN`: Polar API token
+- `POLAR_DICTX_PRODUCT_IDS`: optional comma-separated product IDs allowed for Dictx Pro activation
+- `POLAR_API_BASE`: optional override (defaults to `https://api.polar.sh/v1`)

@@ -5,6 +5,7 @@ import { relaunch } from "@tauri-apps/plugin-process";
 import { listen } from "@tauri-apps/api/event";
 import { ProgressBar } from "../shared";
 import { useSettings } from "../../hooks/useSettings";
+import { useProEntitlement } from "@/hooks/useProEntitlement";
 
 interface UpdateCheckerProps {
   className?: string;
@@ -20,8 +21,10 @@ const UpdateChecker: React.FC<UpdateCheckerProps> = ({ className = "" }) => {
   const [showUpToDate, setShowUpToDate] = useState(false);
 
   const { settings, isLoading } = useSettings();
+  const { entitlement } = useProEntitlement();
   const settingsLoaded = !isLoading && settings !== null;
-  const updateChecksEnabled = settings?.update_checks_enabled ?? false;
+  const proActive = entitlement?.active ?? false;
+  const updateChecksEnabled = (settings?.update_checks_enabled ?? false) && proActive;
 
   const upToDateTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const isManualCheckRef = useRef(false);

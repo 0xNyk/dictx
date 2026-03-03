@@ -42,6 +42,13 @@ Entitlement grants:
 - Auto-update eligibility
 - Priority support queue (if enabled)
 
+Activation flow in app:
+
+- User opens **Settings -> About -> Upgrade to Dictx Pro**
+- User enters purchase email + Polar checkout ID (`polar_cl_...`)
+- App verifies against `https://dictx.splitlabs.io/api/pro/verify`
+- On success, app stores active entitlement and enables updater checks
+
 ## 3) Webhook Processing
 
 Use a webhook endpoint to sync purchases to your entitlement store.
@@ -84,6 +91,7 @@ Before launch:
 - Checkout success flow creates receipt + customer record
 - Webhook signature validation works in production
 - `dictx_pro` entitlement is granted/revoked correctly
+- `landing/api/pro/verify` returns `{ active: true }` only for valid paid checkout + matching email
 - Customer portal access works from receipt email
 - Purchase links from app + README resolve to `https://dictx.splitlabs.io/buy`
 

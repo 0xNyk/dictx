@@ -5,14 +5,27 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 import { SettingsGroup } from "../../ui/SettingsGroup";
 import { SettingContainer } from "../../ui/SettingContainer";
 import { Button } from "../../ui/Button";
+import { Input } from "../../ui/Input";
 import { openProPurchasePage } from "@/utils/commerce";
 import { AppDataDirectory } from "../AppDataDirectory";
 import { AppLanguageSelector } from "../AppLanguageSelector";
 import { LogDirectory } from "../debug";
+import { useProEntitlement } from "@/hooks/useProEntitlement";
 
 export const AboutSettings: React.FC = () => {
   const { t } = useTranslation();
   const [version, setVersion] = useState("");
+  const [checkoutId, setCheckoutId] = useState("");
+  const [email, setEmail] = useState("");
+  const {
+    entitlement,
+    isLoading: proLoading,
+    isSubmitting: proSubmitting,
+    error: proError,
+    activate,
+    refresh,
+    clear,
+  } = useProEntitlement();
 
   useEffect(() => {
     const fetchVersion = async () => {
@@ -27,6 +40,13 @@ export const AboutSettings: React.FC = () => {
 
     fetchVersion();
   }, []);
+
+  const handleActivate = async () => {
+    const ok = await activate(checkoutId, email);
+    if (ok) {
+      setCheckoutId("");
+    }
+  };
 
   return (
     <div className="max-w-3xl w-full mx-auto space-y-6">
@@ -45,14 +65,86 @@ export const AboutSettings: React.FC = () => {
           title={t("settings.about.supportDevelopment.title")}
           description={t("settings.about.supportDevelopment.description")}
           grouped={true}
+          layout="stacked"
         >
-          <Button
-            variant="primary"
-            size="md"
-            onClick={() => void openProPurchasePage()}
-          >
-            {t("settings.about.supportDevelopment.button")}
-          </Button>
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                variant="primary"
+                size="md"
+                onClick={() => void openProPurchasePage()}
+              >
+                {t("settings.about.supportDevelopment.button")}
+              </Button>
+              <Button
+                variant="secondary"
+                size="md"
+                onClick={() => void refresh()}
+                disabled={proLoading || proSubmitting}
+              >
+                {t("settings.about.proActivation.refresh")}
+              </Button>
+              {entitlement?.active && (
+                <Button
+                  variant="secondary"
+                  size="md"
+                  onClick={() => void clear()}
+                  disabled={proSubmitting}
+                >
+                  {t("settings.about.proActivation.clear")}
+                </Button>
+              )}
+            </div>
+
+            <div className="rounded-md border border-mid-gray/20 p-3 space-y-2">
+              <p className="text-sm text-text/80">
+                {entitlement?.active
+                  ? t("settings.about.proActivation.active")
+                  : t("settings.about.proActivation.inactive")}
+              </p>
+              {entitlement?.email && (
+                <p className="text-xs text-text/60">
+                  {t("settings.about.proActivation.email")}: {entitlement.email}
+                </p>
+              )}
+              {entitlement?.checkout_id && (
+                <p className="text-xs text-text/60">
+                  {t("settings.about.proActivation.checkoutId")}:{" "}
+                  {entitlement.checkout_id}
+                </p>
+              )}
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <Input
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  placeholder={t("settings.about.proActivation.emailPlaceholder")}
+                  disabled={proSubmitting}
+                />
+                <Input
+                  value={checkoutId}
+                  onChange={(event) => setCheckoutId(event.target.value)}
+                  placeholder={t(
+                    "settings.about.proActivation.checkoutIdPlaceholder",
+                  )}
+                  disabled={proSubmitting}
+                />
+              </div>
+              <Button
+                variant="primary"
+                size="md"
+                onClick={() => void handleActivate()}
+                disabled={proSubmitting || !email.trim() || !checkoutId.trim()}
+              >
+                {t("settings.about.proActivation.activate")}
+              </Button>
+              {proError && <p className="text-xs text-red-400">{proError}</p>}
+              {entitlement?.verification_error && (
+                <p className="text-xs text-red-400">
+                  {entitlement.verification_error}
+                </p>
+              )}
+            </div>
+          </div>
         </SettingContainer>
 
         <SettingContainer

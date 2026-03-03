@@ -58,9 +58,21 @@ body {
   gap: 20px;
 }
 
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.brand-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+}
+
 .wordmark {
   color: var(--color-logo-primary);
-  text-decoration: none;
   font-size: 34px;
   font-weight: 700;
   letter-spacing: -0.04em;
@@ -128,6 +140,24 @@ h1 {
   font-size: clamp(18px, 2.2vw, 23px);
 }
 
+.trust-points {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  list-style: none;
+  padding: 0;
+  margin: 20px 0 0;
+}
+
+.trust-points li {
+  border: 1px solid color-mix(in srgb, var(--color-mid-gray) 28%, transparent);
+  background: color-mix(in srgb, var(--color-logo-primary) 8%, transparent);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: color-mix(in srgb, var(--color-text) 86%, transparent);
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;
@@ -184,6 +214,19 @@ h1 {
   margin: 14px 0 0;
   color: color-mix(in srgb, var(--color-text) 58%, transparent);
   font-size: 13px;
+}
+
+.hero-proof {
+  margin-top: 16px;
+  border-top: 1px solid
+    color-mix(in srgb, var(--color-mid-gray) 20%, transparent);
+  padding-top: 10px;
+}
+
+.hero-proof p {
+  margin: 0;
+  font-size: 12px;
+  color: color-mix(in srgb, var(--color-text) 60%, transparent);
 }
 
 .grid3 {
@@ -302,6 +345,23 @@ summary {
 details p {
   margin: 9px 0 0;
   color: color-mix(in srgb, var(--color-text) 72%, transparent);
+}
+
+.final-cta {
+  border-top: 1px solid
+    color-mix(in srgb, var(--color-mid-gray) 24%, transparent);
+  margin-top: 6px;
+  padding-top: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.final-cta p {
+  margin: 0;
+  color: color-mix(in srgb, var(--color-text) 82%, transparent);
 }
 
 .foot {

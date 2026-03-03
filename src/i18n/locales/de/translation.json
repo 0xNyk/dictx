@@ -1,5 +1,6 @@
 {
   "tray": {
+    "startDictation": "Start Dictation",
     "settings": "Einstellungen...",
     "checkUpdates": "Nach Updates suchen...",
     "copyLastTranscript": "Letzte Transkription kopieren",
@@ -87,7 +88,7 @@
     },
     "permissions": {
       "title": "Berechtigungen erforderlich",
-      "description": "Handy benötigt einige Berechtigungen, um richtig zu funktionieren.",
+      "description": "Dictx benötigt einige Berechtigungen, um richtig zu funktionieren.",
       "microphone": {
         "title": "Mikrofonzugriff",
         "description": "Erforderlich, um Ihre Stimme für die Transkription zu hören."
@@ -161,7 +162,7 @@
     "general": {
       "title": "Allgemein",
       "shortcut": {
-        "title": "Handy-Tastenkürzel",
+        "title": "Dictx-Tastenkürzel",
         "description": "Tastenkürzel für die Sprachaufnahme konfigurieren",
         "loading": "Tastenkürzel werden geladen...",
         "none": "Keine Tastenkürzel konfiguriert",
@@ -230,7 +231,8 @@
         "output": "Ausgabe",
         "transcription": "Transkription",
         "history": "Verlauf",
-        "experimental": "Experimentell"
+        "experimental": "Experimentell",
+        "obsidian": "Obsidian Integration"
       },
       "experimentalToggle": {
         "label": "Experimentelle Funktionen",
@@ -242,11 +244,11 @@
       },
       "autostart": {
         "label": "Beim Start ausführen",
-        "description": "Handy automatisch beim Anmelden starten."
+        "description": "Dictx automatisch beim Anmelden starten."
       },
       "showTrayIcon": {
         "label": "Taskleistensymbol anzeigen",
-        "description": "Das Handy-Symbol in der Taskleiste anzeigen."
+        "description": "Das Dictx-Symbol in der Taskleiste anzeigen."
       },
       "overlay": {
         "title": "Overlay-Position",
@@ -407,7 +409,7 @@
       },
       "updateChecks": {
         "label": "Nach Updates suchen",
-        "description": "Automatisch nach neuen Versionen von Handy suchen"
+        "description": "Automatisch nach neuen Versionen von Dictx suchen"
       },
       "soundTheme": {
         "label": "Sound-Thema",
@@ -471,11 +473,11 @@
       "title": "Info",
       "version": {
         "title": "Version",
-        "description": "Aktuelle Version von Handy"
+        "description": "Aktuelle Version von Dictx"
       },
       "appDataDirectory": {
         "title": "App-Datenverzeichnis",
-        "description": "Speicherort der Handy-Daten"
+        "description": "Speicherort der Dictx-Daten"
       },
       "sourceCode": {
         "title": "Quellcode",
@@ -484,7 +486,7 @@
       },
       "supportDevelopment": {
         "title": "Entwicklung unterstützen",
-        "description": "Hilf uns, Handy weiterzuentwickeln",
+        "description": "Hilf uns, Dictx weiterzuentwickeln",
         "button": "Spenden"
       },
       "acknowledgments": {
@@ -492,8 +494,29 @@
         "whisper": {
           "title": "Whisper.cpp",
           "description": "Hochleistungs-Inferenz des Whisper-Spracherkennungsmodells von OpenAI",
-          "details": "Handy verwendet Whisper.cpp für schnelle, lokale Sprach-zu-Text-Verarbeitung. Dank an Georgi Gerganov und die Mitwirkenden für ihre großartige Arbeit."
+          "details": "Dictx verwendet Whisper.cpp für schnelle, lokale Sprach-zu-Text-Verarbeitung. Dank an Georgi Gerganov und die Mitwirkenden für ihre großartige Arbeit."
         }
+      }
+    },
+    "obsidian": {
+      "exportToggle": {
+        "label": "Export to Obsidian",
+        "description": "Automatically save transcriptions as markdown notes in your Obsidian vault"
+      },
+      "vaultPath": {
+        "title": "Vault Path",
+        "description": "Path to your Obsidian vault root folder",
+        "notSet": "Not set",
+        "browse": "Browse",
+        "dialogTitle": "Select Obsidian Vault"
+      },
+      "subfolder": {
+        "title": "Subfolder",
+        "description": "Folder within your vault for voice notes"
+      },
+      "appendToDaily": {
+        "label": "Append to Daily Note",
+        "description": "Add a reference to each transcription in today's daily note"
       }
     }
   },
@@ -535,7 +558,7 @@
   },
   "accessibility": {
     "permissionsRequired": "Bedienungshilfen-Berechtigungen erforderlich",
-    "permissionsDescription": "Handy benötigt Bedienungshilfen-Berechtigungen, um transkribierten Text einzugeben.",
+    "permissionsDescription": "Dictx benötigt Bedienungshilfen-Berechtigungen, um transkribierten Text einzugeben.",
     "openSettings": "Systemeinstellungen öffnen",
     "dismiss": "Schließen"
   },
@@ -544,7 +567,7 @@
   },
   "appLanguage": {
     "title": "Anwendungssprache",
-    "description": "Sprache der Handy-Oberfläche ändern"
+    "description": "Sprache der Dictx-Oberfläche ändern"
   },
   "overlay": {
     "transcribing": "Transkribiere...",

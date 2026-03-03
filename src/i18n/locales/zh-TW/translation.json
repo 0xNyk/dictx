@@ -1,5 +1,6 @@
 {
   "tray": {
+    "startDictation": "Start Dictation",
     "settings": "設定...",
     "checkUpdates": "檢查更新...",
     "copyLastTranscript": "複製最新轉錄",
@@ -87,7 +88,7 @@
     },
     "permissions": {
       "title": "需要權限",
-      "description": "Handy 需要一些權限才能正常運作",
+      "description": "Dictx 需要一些權限才能正常運作",
       "microphone": {
         "title": "麥克風存取",
         "description": "需要聽取您的語音進行轉錄"
@@ -143,7 +144,7 @@
     "general": {
       "title": "一般",
       "shortcut": {
-        "title": "Handy 快捷鍵",
+        "title": "Dictx 快捷鍵",
         "description": "設定啟動語音轉文字錄製的鍵盤快捷鍵",
         "loading": "載入快捷鍵中...",
         "none": "未設定快捷鍵",
@@ -230,7 +231,8 @@
         "output": "輸出",
         "transcription": "轉錄",
         "history": "歷史",
-        "experimental": "實驗性"
+        "experimental": "實驗性",
+        "obsidian": "Obsidian Integration"
       },
       "experimentalToggle": {
         "label": "實驗性功能",
@@ -242,11 +244,11 @@
       },
       "autostart": {
         "label": "開機啟動",
-        "description": "登入電腦時自動啟動 Handy"
+        "description": "登入電腦時自動啟動 Dictx"
       },
       "showTrayIcon": {
         "label": "顯示系統匣圖示",
-        "description": "在系統匣中顯示 Handy 圖示"
+        "description": "在系統匣中顯示 Dictx 圖示"
       },
       "overlay": {
         "title": "懸浮窗位置",
@@ -407,7 +409,7 @@
       },
       "updateChecks": {
         "label": "檢查更新",
-        "description": "自動檢查 Handy 的新版本"
+        "description": "自動檢查 Dictx 的新版本"
       },
       "soundTheme": {
         "label": "聲音主題",
@@ -471,11 +473,11 @@
       "title": "關於",
       "version": {
         "title": "版本",
-        "description": "Handy 的目前版本"
+        "description": "Dictx 的目前版本"
       },
       "appDataDirectory": {
         "title": "應用程式資料目錄",
-        "description": "Handy 儲存資料的位置"
+        "description": "Dictx 儲存資料的位置"
       },
       "sourceCode": {
         "title": "原始碼",
@@ -484,7 +486,7 @@
       },
       "supportDevelopment": {
         "title": "支持開發",
-        "description": "幫助我們繼續開發 Handy",
+        "description": "幫助我們繼續開發 Dictx",
         "button": "捐贈"
       },
       "acknowledgments": {
@@ -492,8 +494,29 @@
         "whisper": {
           "title": "Whisper.cpp",
           "description": "針對 OpenAI Whisper 自動語音識別模型的高效能推理引擎",
-          "details": "Handy 使用 Whisper.cpp 進行快速的本機語音轉文字處理。感謝 Georgi Gerganov 和貢獻者們的傑出工作"
+          "details": "Dictx 使用 Whisper.cpp 進行快速的本機語音轉文字處理。感謝 Georgi Gerganov 和貢獻者們的傑出工作"
         }
+      }
+    },
+    "obsidian": {
+      "exportToggle": {
+        "label": "Export to Obsidian",
+        "description": "Automatically save transcriptions as markdown notes in your Obsidian vault"
+      },
+      "vaultPath": {
+        "title": "Vault Path",
+        "description": "Path to your Obsidian vault root folder",
+        "notSet": "Not set",
+        "browse": "Browse",
+        "dialogTitle": "Select Obsidian Vault"
+      },
+      "subfolder": {
+        "title": "Subfolder",
+        "description": "Folder within your vault for voice notes"
+      },
+      "appendToDaily": {
+        "label": "Append to Daily Note",
+        "description": "Add a reference to each transcription in today's daily note"
       }
     }
   },
@@ -535,7 +558,7 @@
   },
   "accessibility": {
     "permissionsRequired": "需要輔助使用權限",
-    "permissionsDescription": "Handy 需要輔助使用權限才能輸入轉錄的文字",
+    "permissionsDescription": "Dictx 需要輔助使用權限才能輸入轉錄的文字",
     "openSettings": "開啟系統設定",
     "dismiss": "關閉"
   },
@@ -544,7 +567,7 @@
   },
   "appLanguage": {
     "title": "應用程式語言",
-    "description": "變更 Handy 介面的語言"
+    "description": "變更 Dictx 介面的語言"
   },
   "overlay": {
     "transcribing": "正在轉錄...",

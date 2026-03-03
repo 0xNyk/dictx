@@ -18,6 +18,12 @@ import { RecordingRetentionPeriodSelector } from "../RecordingRetentionPeriod";
 import { ExperimentalToggle } from "../ExperimentalToggle";
 import { useSettings } from "../../../hooks/useSettings";
 import { KeyboardImplementationSelector } from "../debug/KeyboardImplementationSelector";
+import {
+  ObsidianExportToggle,
+  ObsidianVaultPath,
+  ObsidianSubfolder,
+  ObsidianAppendToDaily,
+} from "../ObsidianExport";
 
 export const AdvancedSettings: React.FC = () => {
   const { t } = useTranslation();
@@ -53,6 +59,13 @@ export const AdvancedSettings: React.FC = () => {
           descriptionMode="tooltip"
           grouped={true}
         />
+      </SettingsGroup>
+
+      <SettingsGroup title={t("settings.advanced.groups.obsidian")}>
+        <ObsidianExportToggle descriptionMode="tooltip" grouped={true} />
+        <ObsidianVaultPath descriptionMode="tooltip" grouped={true} />
+        <ObsidianSubfolder descriptionMode="tooltip" grouped={true} />
+        <ObsidianAppendToDaily descriptionMode="tooltip" grouped={true} />
       </SettingsGroup>
 
       {experimentalEnabled && (

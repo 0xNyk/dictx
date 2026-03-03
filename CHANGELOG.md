@@ -126,7 +126,7 @@
 
 ### Added
 
-- **Initial release** of Handy
+- **Initial release** of Dictx
 - Basic speech-to-text transcription functionality
 - Voice Activity Detection (VAD) for automatic recording
 - Cross-platform support (macOS, Windows, Linux)

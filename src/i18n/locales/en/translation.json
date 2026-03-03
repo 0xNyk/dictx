@@ -1,5 +1,6 @@
 {
   "tray": {
+    "startDictation": "Start Dictation",
     "settings": "Settings...",
     "checkUpdates": "Check for Updates...",
     "copyLastTranscript": "Copy Last Transcript",
@@ -87,7 +88,7 @@
     },
     "permissions": {
       "title": "Permissions Required",
-      "description": "Handy needs a couple of permissions to work properly.",
+      "description": "Dictx needs a couple of permissions to work properly.",
       "microphone": {
         "title": "Microphone Access",
         "description": "Required to hear your voice for transcription."
@@ -143,7 +144,7 @@
     "general": {
       "title": "General",
       "shortcut": {
-        "title": "Handy Shortcuts",
+        "title": "Dictx Shortcuts",
         "description": "Configure keyboard shortcuts to trigger speech-to-text recording",
         "loading": "Loading shortcuts...",
         "none": "No shortcuts configured",
@@ -230,6 +231,7 @@
         "output": "Output",
         "transcription": "Transcription",
         "history": "History",
+        "obsidian": "Obsidian Integration",
         "experimental": "Experimental"
       },
       "experimentalToggle": {
@@ -242,11 +244,11 @@
       },
       "autostart": {
         "label": "Launch on Startup",
-        "description": "Automatically start Handy when you log in to your computer."
+        "description": "Automatically start Dictx when you log in to your computer."
       },
       "showTrayIcon": {
         "label": "Show Tray Icon",
-        "description": "Display the Handy icon in the system tray."
+        "description": "Display the Dictx icon in the system tray."
       },
       "overlay": {
         "title": "Overlay Position",
@@ -322,6 +324,27 @@
         "add": "Add",
         "remove": "Remove {{word}}",
         "duplicate": "\"{{word}}\" already exists"
+      }
+    },
+    "obsidian": {
+      "exportToggle": {
+        "label": "Export to Obsidian",
+        "description": "Automatically save transcriptions as markdown notes in your Obsidian vault"
+      },
+      "vaultPath": {
+        "title": "Vault Path",
+        "description": "Path to your Obsidian vault root folder",
+        "notSet": "Not set",
+        "browse": "Browse",
+        "dialogTitle": "Select Obsidian Vault"
+      },
+      "subfolder": {
+        "title": "Subfolder",
+        "description": "Folder within your vault for voice notes"
+      },
+      "appendToDaily": {
+        "label": "Append to Daily Note",
+        "description": "Add a reference to each transcription in today's daily note"
       }
     },
     "postProcessing": {
@@ -407,7 +430,7 @@
       },
       "updateChecks": {
         "label": "Check for Updates",
-        "description": "Automatically check for new versions of Handy"
+        "description": "Automatically check for new versions of Dictx"
       },
       "soundTheme": {
         "label": "Sound Theme",
@@ -471,11 +494,11 @@
       "title": "About",
       "version": {
         "title": "Version",
-        "description": "Current version of Handy"
+        "description": "Current version of Dictx"
       },
       "appDataDirectory": {
         "title": "App Data Directory",
-        "description": "Location where Handy stores its data"
+        "description": "Location where Dictx stores its data"
       },
       "sourceCode": {
         "title": "Source Code",
@@ -484,7 +507,7 @@
       },
       "supportDevelopment": {
         "title": "Support Development",
-        "description": "Help us continue building Handy",
+        "description": "Help us continue building Dictx",
         "button": "Donate"
       },
       "acknowledgments": {
@@ -492,7 +515,7 @@
         "whisper": {
           "title": "Whisper.cpp",
           "description": "High-performance inference of OpenAI's Whisper automatic speech recognition model",
-          "details": "Handy uses Whisper.cpp for fast, local speech-to-text processing. Thanks to the amazing work by Georgi Gerganov and contributors."
+          "details": "Dictx uses Whisper.cpp for fast, local speech-to-text processing. Thanks to the amazing work by Georgi Gerganov and contributors."
         }
       }
     }
@@ -535,7 +558,7 @@
   },
   "accessibility": {
     "permissionsRequired": "Accessibility Permissions Required",
-    "permissionsDescription": "Handy needs accessibility permissions to type transcribed text.",
+    "permissionsDescription": "Dictx needs accessibility permissions to type transcribed text.",
     "openSettings": "Open System Settings",
     "dismiss": "Dismiss"
   },
@@ -544,7 +567,7 @@
   },
   "appLanguage": {
     "title": "Application Language",
-    "description": "Change the language of the Handy interface"
+    "description": "Change the language of the Dictx interface"
   },
   "overlay": {
     "transcribing": "Transcribing...",

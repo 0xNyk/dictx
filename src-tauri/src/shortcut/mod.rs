@@ -1065,3 +1065,55 @@ pub fn change_show_tray_icon_setting(app: AppHandle, enabled: bool) -> Result<()
 
     Ok(())
 }
+
+#[tauri::command]
+#[specta::specta]
+pub fn change_obsidian_export_enabled_setting(
+    app: AppHandle,
+    enabled: bool,
+) -> Result<(), String> {
+    let mut settings = settings::get_settings(&app);
+    settings.obsidian_export_enabled = enabled;
+    settings::write_settings(&app, settings);
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn change_obsidian_vault_path_setting(
+    app: AppHandle,
+    path: String,
+) -> Result<(), String> {
+    let mut settings = settings::get_settings(&app);
+    settings.obsidian_vault_path = if path.is_empty() { None } else { Some(path) };
+    settings::write_settings(&app, settings);
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn change_obsidian_export_subfolder_setting(
+    app: AppHandle,
+    subfolder: String,
+) -> Result<(), String> {
+    let mut settings = settings::get_settings(&app);
+    settings.obsidian_export_subfolder = if subfolder.is_empty() {
+        Some("voice-notes".to_string())
+    } else {
+        Some(subfolder)
+    };
+    settings::write_settings(&app, settings);
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn change_obsidian_append_to_daily_setting(
+    app: AppHandle,
+    enabled: bool,
+) -> Result<(), String> {
+    let mut settings = settings::get_settings(&app);
+    settings.obsidian_append_to_daily = enabled;
+    settings::write_settings(&app, settings);
+    Ok(())
+}

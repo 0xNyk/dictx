@@ -8,17 +8,31 @@
       name="description"
       content="Dictx is local-first desktop speech-to-text. Dictx Pro gives you signed binaries and in-app auto-updates."
     />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="./favicon-32x32.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="128x128"
+      href="./apple-touch-icon.png"
+    />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
     <div class="noise"></div>
     <header class="nav shell">
-      <a class="wordmark" href="#top" aria-label="Dictx home">Dictx</a>
+      <a class="brand" href="#top" aria-label="Dictx home">
+        <img src="./logo.png" class="brand-icon" alt="Dictx logo" />
+        <span class="wordmark">Dictx</span>
+      </a>
       <nav class="menu" aria-label="Primary">
         <a href="#features">Features</a>
         <a href="#pricing">Pricing</a>
         <a
-          href="https://github.com/0xNyk/dictx"
+          href="https://github.com/splitlabs/dictx"
           target="_blank"
           rel="noreferrer"
           >GitHub</a
@@ -30,16 +44,21 @@
     <main id="top" class="shell">
       <section class="hero panel">
         <p class="kicker">Split Labs • Dictx</p>
-        <h1>Voice capture for serious writing workflows.</h1>
+        <h1>Transcription you can trust in real work.</h1>
         <p class="lede">
           Transcribe locally, keep control of your data, and ship faster with a
           desktop app designed for daily use.
         </p>
+        <ul class="trust-points" aria-label="Core value points">
+          <li>No cloud lock-in</li>
+          <li>Runs on your machine</li>
+          <li>Signed Pro builds</li>
+        </ul>
         <div class="actions">
           <a class="btn primary" href="/buy">Buy Dictx Pro</a>
           <a
             class="btn soft"
-            href="https://github.com/0xNyk/dictx/releases"
+            href="https://github.com/splitlabs/dictx/releases"
             target="_blank"
             rel="noreferrer"
             >Download releases</a
@@ -49,6 +68,9 @@
           $29 one-time • signed binaries • auto-updates • macOS / Windows /
           Linux
         </p>
+        <div class="hero-proof">
+          <p>Open source (GPL) • 17 locales • macOS / Windows / Linux</p>
+        </div>
       </section>
 
       <section id="features" class="grid3">
@@ -88,7 +110,7 @@
             </ul>
             <a
               class="btn ghost"
-              href="https://github.com/0xNyk/dictx"
+              href="https://github.com/splitlabs/dictx"
               target="_blank"
               rel="noreferrer"
               >View source</a
@@ -128,6 +150,10 @@
             `landing/vercel.json`.
           </p>
         </details>
+        <div class="final-cta">
+          <p>Ready to skip manual builds and keep updates automatic?</p>
+          <a class="btn primary" href="/buy">Get Dictx Pro</a>
+        </div>
       </section>
     </main>
 

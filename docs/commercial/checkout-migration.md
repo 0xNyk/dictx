@@ -46,9 +46,10 @@ Entitlement grants:
 Activation flow in app:
 
 - User opens **Settings -> About -> Upgrade to Dictx Pro**
-- User enters license key (`polar_cl_...`)
+- User enters Polar license key (`lk_...`)
 - App verifies against `https://dictx.splitlabs.io/api/pro/verify`
 - On success, app stores active entitlement and enables updater checks
+- Legacy checkout keys (`polar_cl_...`) are supported temporarily for migration
 
 ## 3) Webhook Processing
 
@@ -92,7 +93,7 @@ Before launch:
 - Checkout success flow creates receipt + customer record
 - Webhook signature validation works in production
 - `dictx_pro` entitlement is granted/revoked correctly
-- `landing/api/pro/verify` returns `{ active: true }` only for valid paid checkout key
+- `landing/api/pro/verify` returns `{ active: true }` only for valid granted license key (`lk_...`)
 - Customer portal access works from receipt email
 - Purchase links from app + README resolve to `https://dictx.splitlabs.io/buy`
 

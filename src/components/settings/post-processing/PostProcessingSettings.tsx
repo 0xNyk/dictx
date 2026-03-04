@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { RefreshCcw } from "lucide-react";
-import { commands } from "@/bindings";
+import { commands, type DictationMode } from "@/bindings";
 
 import { Alert } from "../../ui/Alert";
 import {
@@ -425,6 +425,17 @@ PostProcessingSettingsPrompts.displayName = "PostProcessingSettingsPrompts";
 
 export const PostProcessingSettings: React.FC = () => {
   const { t } = useTranslation();
+  const { getSetting, updateSetting, isUpdating } = useSettings();
+
+  const modeOptions: Array<{ value: DictationMode; label: string }> = [
+    { value: "raw", label: "Raw (No rewrite)" },
+    { value: "cleanup", label: "Cleanup" },
+    { value: "email", label: "Email Draft" },
+    { value: "meeting_notes", label: "Meeting Notes" },
+    { value: "summary", label: "Summary" },
+  ];
+
+  const selectedMode = (getSetting("dictation_mode") || "cleanup") as DictationMode;
 
   return (
     <div className="max-w-3xl w-full mx-auto space-y-6">
@@ -434,6 +445,21 @@ export const PostProcessingSettings: React.FC = () => {
           descriptionMode="tooltip"
           grouped={true}
         />
+        <SettingContainer
+          title="Dictation mode"
+          description="Controls how post-process output is formatted."
+          descriptionMode="tooltip"
+          grouped={true}
+        >
+          <Dropdown
+            options={modeOptions}
+            selectedValue={selectedMode}
+            onSelect={(value) =>
+              updateSetting("dictation_mode", value as DictationMode)
+            }
+            disabled={isUpdating("dictation_mode")}
+          />
+        </SettingContainer>
       </SettingsGroup>
 
       <SettingsGroup title={t("settings.postProcessing.api.title")}>

@@ -4,7 +4,7 @@ use crate::audio_feedback::{play_feedback_sound, play_feedback_sound_blocking, S
 use crate::managers::audio::AudioRecordingManager;
 use crate::managers::history::HistoryManager;
 use crate::managers::transcription::TranscriptionManager;
-use crate::settings::{get_settings, AppSettings, APPLE_INTELLIGENCE_PROVIDER_ID};
+use crate::settings::{get_settings, AppSettings, DictationMode, APPLE_INTELLIGENCE_PROVIDER_ID};
 use crate::shortcut;
 use crate::tray::{change_tray_icon, TrayIconState};
 use crate::utils::{
@@ -56,7 +56,52 @@ fn build_system_prompt(prompt_template: &str) -> String {
     prompt_template.replace("${output}", "").trim().to_string()
 }
 
+fn resolve_post_process_prompt(settings: &AppSettings) -> Option<String> {
+    match settings.dictation_mode {
+        DictationMode::Raw => None,
+        DictationMode::Cleanup => {
+            let selected_prompt_id = settings.post_process_selected_prompt_id.as_ref()?;
+            settings
+                .post_process_prompts
+                .iter()
+                .find(|prompt| &prompt.id == selected_prompt_id)
+                .map(|prompt| prompt.prompt.clone())
+        }
+        DictationMode::Email => Some(
+            "Rewrite this transcript into a concise professional email.\n\
+            - Keep all factual meaning\n\
+            - Add a short subject line as the first line in format: Subject: ...\n\
+            - Use clean paragraphs and action-oriented tone\n\
+            - Return only the email text\n\n\
+            Transcript:\n${output}"
+                .to_string(),
+        ),
+        DictationMode::MeetingNotes => Some(
+            "Convert this transcript into structured meeting notes.\n\
+            - Include sections: Summary, Decisions, Action Items\n\
+            - Action items must include owner if explicitly mentioned\n\
+            - Do not invent facts\n\
+            - Return only the notes\n\n\
+            Transcript:\n${output}"
+                .to_string(),
+        ),
+        DictationMode::Summary => Some(
+            "Summarize this transcript into clear bullet points.\n\
+            - Preserve key facts and numbers\n\
+            - Keep it brief and scannable\n\
+            - Do not add information not present in the transcript\n\
+            - Return only the summary\n\n\
+            Transcript:\n${output}"
+                .to_string(),
+        ),
+    }
+}
+
 async fn post_process_transcription(settings: &AppSettings, transcription: &str) -> Option<String> {
+    if settings.dictation_mode == DictationMode::Raw {
+        return Some(transcription.to_string());
+    }
+
     let provider = match settings.active_post_process_provider().cloned() {
         Some(provider) => provider,
         None => {
@@ -79,25 +124,10 @@ async fn post_process_transcription(settings: &AppSettings, transcription: &str)
         return None;
     }
 
-    let selected_prompt_id = match &settings.post_process_selected_prompt_id {
-        Some(id) => id.clone(),
+    let prompt = match resolve_post_process_prompt(settings) {
+        Some(prompt) => prompt,
         None => {
-            debug!("Post-processing skipped because no prompt is selected");
-            return None;
-        }
-    };
-
-    let prompt = match settings
-        .post_process_prompts
-        .iter()
-        .find(|prompt| prompt.id == selected_prompt_id)
-    {
-        Some(prompt) => prompt.prompt.clone(),
-        None => {
-            debug!(
-                "Post-processing skipped because prompt '{}' was not found",
-                selected_prompt_id
-            );
+            debug!("Post-processing skipped because no prompt could be resolved");
             return None;
         }
     };
@@ -453,17 +483,7 @@ impl ShortcutAction for TranscribeAction {
                             if let Some(processed_text) = processed {
                                 post_processed_text = Some(processed_text.clone());
                                 final_text = processed_text;
-
-                                // Get the prompt that was used
-                                if let Some(prompt_id) = &settings.post_process_selected_prompt_id {
-                                    if let Some(prompt) = settings
-                                        .post_process_prompts
-                                        .iter()
-                                        .find(|p| &p.id == prompt_id)
-                                    {
-                                        post_process_prompt = Some(prompt.prompt.clone());
-                                    }
-                                }
+                                post_process_prompt = resolve_post_process_prompt(&settings);
                             } else if final_text != transcription {
                                 // Chinese conversion was applied but no LLM post-processing
                                 post_processed_text = Some(final_text.clone());

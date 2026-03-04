@@ -13,7 +13,7 @@ interface ProEntitlementStore {
   isSubmitting: boolean;
   error: string | null;
   initialize: () => Promise<void>;
-  activate: (checkoutId: string, email: string) => Promise<boolean>;
+  activate: (licenseKey: string) => Promise<boolean>;
   refresh: () => Promise<void>;
   clear: () => Promise<void>;
 }
@@ -31,7 +31,7 @@ export const useProEntitlementStore = create<ProEntitlementStore>(
       }
       try {
         let entitlement = await getProEntitlement();
-        if (entitlement.checkout_id && entitlement.email) {
+        if (entitlement.license_key || entitlement.checkout_id) {
           try {
             entitlement = await refreshProEntitlement();
           } catch (_error) {
@@ -46,10 +46,10 @@ export const useProEntitlementStore = create<ProEntitlementStore>(
       }
     },
 
-    activate: async (checkoutId: string, email: string) => {
+    activate: async (licenseKey: string) => {
       set({ isSubmitting: true, error: null });
       try {
-        const entitlement = await activateProEntitlement(checkoutId, email);
+        const entitlement = await activateProEntitlement(licenseKey);
         set({ entitlement });
         return true;
       } catch (error) {

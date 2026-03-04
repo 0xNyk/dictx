@@ -541,14 +541,12 @@
       },
       "proActivation": {
         "active": "Dictx Pro is active on this device.",
-        "inactive": "Dictx Pro is not active. Enter your purchase email and checkout ID to activate updater entitlement.",
+        "inactive": "Dictx Pro is not active. Enter your license key to activate updater entitlement.",
         "activate": "Activate Dictx Pro",
         "refresh": "Re-check Entitlement",
         "clear": "Remove Activation",
-        "email": "Email",
-        "checkoutId": "Checkout ID",
-        "emailPlaceholder": "Purchase email",
-        "checkoutIdPlaceholder": "polar_cl_..."
+        "licenseKey": "License Key",
+        "licenseKeyPlaceholder": "polar_cl_..."
       },
       "acknowledgments": {
         "title": "Acknowledgments",

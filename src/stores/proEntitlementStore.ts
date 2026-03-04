@@ -31,12 +31,10 @@ export const useProEntitlementStore = create<ProEntitlementStore>(
       }
       try {
         let entitlement = await getProEntitlement();
-        if (entitlement.license_key || entitlement.checkout_id) {
-          try {
-            entitlement = await refreshProEntitlement();
-          } catch (_error) {
-            // Keep last known state if background verification fails.
-          }
+        try {
+          entitlement = await refreshProEntitlement();
+        } catch (_error) {
+          // Keep last known state if background verification fails.
         }
         set({ entitlement, error: null });
       } catch (error) {

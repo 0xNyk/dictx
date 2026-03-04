@@ -272,6 +272,8 @@ pub struct ProEntitlement {
     #[serde(default)]
     pub active: bool,
     #[serde(default)]
+    pub source: Option<ProEntitlementSource>,
+    #[serde(default)]
     pub license_key: Option<String>,
     #[serde(default)]
     // Legacy field kept for backward compatibility with older local settings.
@@ -285,6 +287,15 @@ pub struct ProEntitlement {
     pub last_verified_at: Option<i64>,
     #[serde(default)]
     pub verification_error: Option<String>,
+    #[serde(default)]
+    pub install_id: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, Type)]
+#[serde(rename_all = "snake_case")]
+pub enum ProEntitlementSource {
+    LicenseKey,
+    EarlyAdopter,
 }
 
 /* still handy for composing the initial JSON in the store ------------- */

@@ -436,7 +436,9 @@
       },
       "updateChecks": {
         "label": "Проверьте наличие обновлений",
-        "description": "Автоматически проверять наличие новых версий Dictx"
+        "description": "Автоматически проверять наличие новых версий Dictx",
+        "proRequired": "Auto-updates are available for active Dictx Pro installations.",
+        "upgrade": "Activate or Upgrade Pro"
       },
       "soundTheme": {
         "label": "Звуковая тема",
@@ -523,6 +525,17 @@
           "description": "Высокопроизводительный вывод модели автоматического распознавания речи OpenAI Whisper",
           "details": "Dictx использует Whisper.cpp для быстрой локальной обработки речи в текст. Спасибо великолепной работе Георгия Герганова и его участников."
         }
+      },
+      "proActivation": {
+        "active": "Dictx Pro is active on this device.",
+        "inactive": "Dictx Pro is not active. Enter your license key to activate updater entitlement.",
+        "activate": "Activate Dictx Pro",
+        "refresh": "Re-check Entitlement",
+        "clear": "Remove Activation",
+        "licenseKey": "License Key",
+        "licenseKeyPlaceholder": "lk_... (or migration key)",
+        "pasteFromClipboard": "Paste From Clipboard",
+        "clipboardFailed": "Clipboard access failed. Paste manually."
       }
     },
     "obsidian": {

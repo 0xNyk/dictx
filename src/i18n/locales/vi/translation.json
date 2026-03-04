@@ -436,7 +436,9 @@
       },
       "updateChecks": {
         "label": "Kiểm tra cập nhật",
-        "description": "Tự động kiểm tra phiên bản mới của Dictx"
+        "description": "Tự động kiểm tra phiên bản mới của Dictx",
+        "proRequired": "Auto-updates are available for active Dictx Pro installations.",
+        "upgrade": "Activate or Upgrade Pro"
       },
       "soundTheme": {
         "label": "Chủ đề âm thanh",
@@ -523,6 +525,17 @@
           "description": "Suy luận hiệu suất cao của mô hình nhận dạng giọng nói tự động Whisper của OpenAI",
           "details": "Dictx sử dụng Whisper.cpp để xử lý chuyển đổi giọng nói thành văn bản nhanh, cục bộ. Cảm ơn công việc tuyệt vời của Georgi Gerganov và các cộng tác viên."
         }
+      },
+      "proActivation": {
+        "active": "Dictx Pro is active on this device.",
+        "inactive": "Dictx Pro is not active. Enter your license key to activate updater entitlement.",
+        "activate": "Activate Dictx Pro",
+        "refresh": "Re-check Entitlement",
+        "clear": "Remove Activation",
+        "licenseKey": "License Key",
+        "licenseKeyPlaceholder": "lk_... (or migration key)",
+        "pasteFromClipboard": "Paste From Clipboard",
+        "clipboardFailed": "Clipboard access failed. Paste manually."
       }
     },
     "obsidian": {

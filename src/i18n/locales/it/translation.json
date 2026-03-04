@@ -436,7 +436,9 @@
       },
       "updateChecks": {
         "label": "Controlla aggiornamenti",
-        "description": "Controlla automaticamente la disponibilità di nuove versioni di Dictx"
+        "description": "Controlla automaticamente la disponibilità di nuove versioni di Dictx",
+        "proRequired": "Auto-updates are available for active Dictx Pro installations.",
+        "upgrade": "Activate or Upgrade Pro"
       },
       "soundTheme": {
         "label": "Tema Sonoro",
@@ -523,6 +525,17 @@
           "description": "Inferenza ad alte prestazioni del modello di riconoscimento vocale automatico Whisper di OpenAI",
           "details": "Dictx usa Whisper.cpp per il riconoscimento vocale veloce in locale. Grazie a Georgi Gerganov e collaboratori per il fantastico lavoro."
         }
+      },
+      "proActivation": {
+        "active": "Dictx Pro is active on this device.",
+        "inactive": "Dictx Pro is not active. Enter your license key to activate updater entitlement.",
+        "activate": "Activate Dictx Pro",
+        "refresh": "Re-check Entitlement",
+        "clear": "Remove Activation",
+        "licenseKey": "License Key",
+        "licenseKeyPlaceholder": "lk_... (or migration key)",
+        "pasteFromClipboard": "Paste From Clipboard",
+        "clipboardFailed": "Clipboard access failed. Paste manually."
       }
     },
     "obsidian": {

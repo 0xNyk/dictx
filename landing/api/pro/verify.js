@@ -97,7 +97,7 @@ const isRateLimited = (clientId) => {
   return existing.count > RATE_LIMIT_MAX;
 };
 
-module.exports = async (req, res) => {
+const handler = async (req, res) => {
   if (req.method !== "POST") {
     res.status(405).json({ error: "method_not_allowed" });
     return;
@@ -220,3 +220,5 @@ module.exports = async (req, res) => {
     });
   }
 };
+
+export default handler;

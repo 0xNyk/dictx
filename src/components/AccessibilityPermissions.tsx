@@ -93,9 +93,7 @@ const AccessibilityPermissions: React.FC = () => {
     initialSetup();
 
     const interval = window.setInterval(() => {
-      if (!hasAccessibility) {
-        void checkPermissions();
-      }
+      void checkPermissions();
     }, 1500);
 
     window.addEventListener("focus", handleFocus);
@@ -108,8 +106,8 @@ const AccessibilityPermissions: React.FC = () => {
     };
   }, [checkPermissions, hasAccessibility, isMacOS]);
 
-  // Skip rendering on non-macOS platforms or if permission is already granted
-  if (!isMacOS || hasAccessibility) {
+  // Skip rendering on non-macOS platforms
+  if (!isMacOS) {
     return null;
   }
 
@@ -128,22 +126,35 @@ const AccessibilityPermissions: React.FC = () => {
     granted: null,
   };
 
-  const config = buttonConfig[permissionState] as ButtonConfig;
+  const config = buttonConfig[permissionState];
+  const statusClassName = hasAccessibility
+    ? "bg-emerald-400/20 text-emerald-300 border-emerald-400/30"
+    : "bg-amber-400/20 text-amber-200 border-amber-400/30";
+  const statusText = hasAccessibility ? t("common.enabled") : t("common.disabled");
 
   return (
     <div className="p-4 w-full rounded-lg border border-mid-gray">
-      <div className="flex justify-between items-center gap-2">
-        <div className="">
+      <div className="flex justify-between items-center gap-3">
+        <div className="min-w-0 flex-1">
           <p className="text-sm font-medium">
             {t("accessibility.permissionsDescription")}
           </p>
+          <div className="mt-2">
+            <span
+              className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${statusClassName}`}
+            >
+              {statusText}
+            </span>
+          </div>
         </div>
-        <button
-          onClick={handleButtonClick}
-          className={`min-h-10 ${config.className}`}
-        >
-          {config.text}
-        </button>
+        {!hasAccessibility && config && (
+          <button
+            onClick={handleButtonClick}
+            className={`min-h-10 shrink-0 ${config.className}`}
+          >
+            {config.text}
+          </button>
+        )}
       </div>
     </div>
   );

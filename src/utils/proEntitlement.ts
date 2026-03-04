@@ -2,6 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 
 export interface ProEntitlement {
   active: boolean;
+  license_key?: string | null;
   email?: string | null;
   checkout_id?: string | null;
   activated_at?: number | null;
@@ -14,12 +15,10 @@ export const getProEntitlement = async (): Promise<ProEntitlement> => {
 };
 
 export const activateProEntitlement = async (
-  checkoutId: string,
-  email: string,
+  licenseKey: string,
 ): Promise<ProEntitlement> => {
   return await invoke<ProEntitlement>("activate_pro_entitlement", {
-    checkoutId,
-    email,
+    license_key: licenseKey,
   });
 };
 

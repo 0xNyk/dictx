@@ -280,8 +280,12 @@ pub struct ProEntitlement {
     #[serde(default)]
     pub active: bool,
     #[serde(default)]
+    pub license_key: Option<String>,
+    #[serde(default)]
+    // Legacy field kept for backward compatibility with older local settings.
     pub email: Option<String>,
     #[serde(default)]
+    // Legacy field kept for backward compatibility with older local settings.
     pub checkout_id: Option<String>,
     #[serde(default)]
     pub activated_at: Option<i64>,

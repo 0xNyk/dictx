@@ -5,8 +5,6 @@ const ALLOWED_PRODUCT_IDS = (process.env.POLAR_DICTX_PRODUCT_IDS || "")
   .map((value) => value.trim())
   .filter(Boolean);
 
-const normalizeEmail = (value) => value.trim().toLowerCase();
-
 const readBody = (req) => {
   if (!req.body) return {};
   if (typeof req.body === "string") {
@@ -42,17 +40,16 @@ module.exports = async (req, res) => {
   }
 
   const body = readBody(req);
-  const checkoutId = (body.checkoutId || "").trim();
-  const email = normalizeEmail(body.email || "");
+  const licenseKey = (body.licenseKey || body.checkoutId || "").trim();
 
-  if (!checkoutId || !email) {
-    res.status(400).json({ error: "checkoutId_and_email_required" });
+  if (!licenseKey) {
+    res.status(400).json({ error: "licenseKey_required" });
     return;
   }
 
   try {
     const response = await fetch(
-      `${POLAR_API_BASE}/checkouts/${encodeURIComponent(checkoutId)}`,
+      `${POLAR_API_BASE}/checkouts/${encodeURIComponent(licenseKey)}`,
       {
         method: "GET",
         headers: {
@@ -74,21 +71,13 @@ module.exports = async (req, res) => {
     }
 
     const checkout = await response.json();
-    const checkoutEmail = normalizeEmail(
-      checkout.customer_email ||
-        checkout.customer?.email ||
-        checkout.metadata?.customer_email ||
-        "",
-    );
-
     const productId =
       checkout.product_id == null ? "" : String(checkout.product_id);
     const productAllowed =
       ALLOWED_PRODUCT_IDS.length === 0 || ALLOWED_PRODUCT_IDS.includes(productId);
-    const emailMatches = checkoutEmail !== "" && checkoutEmail === email;
     const paid = statusLooksPaid(checkout.status, checkout.paid);
 
-    res.status(200).json({ active: Boolean(productAllowed && emailMatches && paid) });
+    res.status(200).json({ active: Boolean(productAllowed && paid) });
   } catch (error) {
     res.status(500).json({
       error: "internal_error",

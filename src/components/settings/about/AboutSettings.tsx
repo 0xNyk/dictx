@@ -15,16 +15,12 @@ import { useProEntitlement } from "@/hooks/useProEntitlement";
 export const AboutSettings: React.FC = () => {
   const { t } = useTranslation();
   const [version, setVersion] = useState("");
-  const [checkoutId, setCheckoutId] = useState("");
-  const [email, setEmail] = useState("");
+  const [licenseKey, setLicenseKey] = useState("");
   const {
     entitlement,
-    isLoading: proLoading,
     isSubmitting: proSubmitting,
     error: proError,
     activate,
-    refresh,
-    clear,
   } = useProEntitlement();
 
   useEffect(() => {
@@ -42,9 +38,9 @@ export const AboutSettings: React.FC = () => {
   }, []);
 
   const handleActivate = async () => {
-    const ok = await activate(checkoutId, email);
+    const ok = await activate(licenseKey);
     if (ok) {
-      setCheckoutId("");
+      setLicenseKey("");
     }
   };
 
@@ -76,24 +72,6 @@ export const AboutSettings: React.FC = () => {
               >
                 {t("settings.about.supportDevelopment.button")}
               </Button>
-              <Button
-                variant="secondary"
-                size="md"
-                onClick={() => void refresh()}
-                disabled={proLoading || proSubmitting}
-              >
-                {t("settings.about.proActivation.refresh")}
-              </Button>
-              {entitlement?.active && (
-                <Button
-                  variant="secondary"
-                  size="md"
-                  onClick={() => void clear()}
-                  disabled={proSubmitting}
-                >
-                  {t("settings.about.proActivation.clear")}
-                </Button>
-              )}
             </div>
 
             <div className="rounded-md border border-mid-gray/20 p-3 space-y-2">
@@ -102,38 +80,23 @@ export const AboutSettings: React.FC = () => {
                   ? t("settings.about.proActivation.active")
                   : t("settings.about.proActivation.inactive")}
               </p>
-              {entitlement?.email && (
+              {(entitlement?.license_key || entitlement?.checkout_id) && (
                 <p className="text-xs text-text/60">
-                  {t("settings.about.proActivation.email")}: {entitlement.email}
+                  {t("settings.about.proActivation.licenseKey")}:{" "}
+                  {entitlement.license_key ?? entitlement.checkout_id}
                 </p>
               )}
-              {entitlement?.checkout_id && (
-                <p className="text-xs text-text/60">
-                  {t("settings.about.proActivation.checkoutId")}:{" "}
-                  {entitlement.checkout_id}
-                </p>
-              )}
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                <Input
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  placeholder={t("settings.about.proActivation.emailPlaceholder")}
-                  disabled={proSubmitting}
-                />
-                <Input
-                  value={checkoutId}
-                  onChange={(event) => setCheckoutId(event.target.value)}
-                  placeholder={t(
-                    "settings.about.proActivation.checkoutIdPlaceholder",
-                  )}
-                  disabled={proSubmitting}
-                />
-              </div>
+              <Input
+                value={licenseKey}
+                onChange={(event) => setLicenseKey(event.target.value)}
+                placeholder={t("settings.about.proActivation.licenseKeyPlaceholder")}
+                disabled={proSubmitting}
+              />
               <Button
                 variant="primary"
                 size="md"
                 onClick={() => void handleActivate()}
-                disabled={proSubmitting || !email.trim() || !checkoutId.trim()}
+                disabled={proSubmitting || !licenseKey.trim()}
               >
                 {t("settings.about.proActivation.activate")}
               </Button>

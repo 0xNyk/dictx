@@ -17,7 +17,7 @@ Attach `dictx.splitlabs.io` to this Vercel project.
 
 - `/` serves `landing/index.html`
 - `/buy` redirects to Polar checkout
-- `/api/pro/verify` validates a Polar checkout/email pair for in-app Pro activation
+- `/api/pro/verify` validates a Polar license key (`polar_cl_...`) for in-app Pro activation
 
 ## Environment Variables (Vercel)
 

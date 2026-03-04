@@ -9,8 +9,7 @@ const DEFAULT_PRO_VERIFY_URL: &str = "https://dictx.splitlabs.io/api/pro/verify"
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct VerifyRequest {
-    checkout_id: String,
-    email: String,
+    license_key: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -23,18 +22,13 @@ fn get_verify_url() -> String {
     std::env::var("DICTX_PRO_VERIFY_URL").unwrap_or_else(|_| DEFAULT_PRO_VERIFY_URL.to_string())
 }
 
-fn normalize_email(email: &str) -> String {
-    email.trim().to_lowercase()
-}
-
-async fn verify_checkout(checkout_id: &str, email: &str) -> Result<bool, String> {
+async fn verify_checkout(license_key: &str) -> Result<bool, String> {
     let payload = VerifyRequest {
-        checkout_id: checkout_id.trim().to_string(),
-        email: normalize_email(email),
+        license_key: license_key.trim().to_string(),
     };
 
-    if payload.checkout_id.is_empty() || payload.email.is_empty() {
-        return Err("Checkout ID and email are required".to_string());
+    if payload.license_key.is_empty() {
+        return Err("License key is required".to_string());
     }
 
     let client = reqwest::Client::new();
@@ -87,20 +81,20 @@ pub fn clear_pro_entitlement(app: AppHandle) -> Result<ProEntitlement, String> {
 #[specta::specta]
 pub async fn activate_pro_entitlement(
     app: AppHandle,
-    checkout_id: String,
-    email: String,
+    license_key: String,
 ) -> Result<ProEntitlement, String> {
-    let active = verify_checkout(&checkout_id, &email).await?;
+    let active = verify_checkout(&license_key).await?;
     if !active {
-        return Err("No active Dictx Pro entitlement found for this checkout/email".to_string());
+        return Err("No active Dictx Pro entitlement found for this license key".to_string());
     }
 
     let now = Utc::now().timestamp();
     let mut app_settings = settings::get_settings(&app);
     app_settings.pro_entitlement = ProEntitlement {
         active: true,
-        email: Some(normalize_email(&email)),
-        checkout_id: Some(checkout_id.trim().to_string()),
+        license_key: Some(license_key.trim().to_string()),
+        email: None,
+        checkout_id: None,
         activated_at: Some(now),
         last_verified_at: Some(now),
         verification_error: None,
@@ -117,20 +111,22 @@ pub async fn activate_pro_entitlement(
 pub async fn refresh_pro_entitlement(app: AppHandle) -> Result<ProEntitlement, String> {
     let mut app_settings = settings::get_settings(&app);
 
-    let checkout_id = match app_settings.pro_entitlement.checkout_id.clone() {
-        Some(value) if !value.trim().is_empty() => value,
-        _ => return Ok(app_settings.pro_entitlement),
-    };
-
-    let email = match app_settings.pro_entitlement.email.clone() {
+    // Support legacy activations by falling back to checkout_id if license_key is missing.
+    let license_key = match app_settings
+        .pro_entitlement
+        .license_key
+        .clone()
+        .or_else(|| app_settings.pro_entitlement.checkout_id.clone())
+    {
         Some(value) if !value.trim().is_empty() => value,
         _ => return Ok(app_settings.pro_entitlement),
     };
 
     let now = Utc::now().timestamp();
-    match verify_checkout(&checkout_id, &email).await {
+    match verify_checkout(&license_key).await {
         Ok(true) => {
             app_settings.pro_entitlement.active = true;
+            app_settings.pro_entitlement.license_key = Some(license_key);
             app_settings.pro_entitlement.last_verified_at = Some(now);
             app_settings.pro_entitlement.verification_error = None;
         }

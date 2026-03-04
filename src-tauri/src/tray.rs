@@ -46,18 +46,16 @@ pub fn get_current_theme(app: &AppHandle) -> AppTheme {
 /// Gets the appropriate icon path for the given theme and state
 pub fn get_icon_path(theme: AppTheme, state: TrayIconState) -> &'static str {
     match (theme, state) {
-        // Dark theme uses light icons
-        (AppTheme::Dark, TrayIconState::Idle) => "resources/tray_idle.png",
-        (AppTheme::Dark, TrayIconState::Recording) => "resources/tray_recording.png",
-        (AppTheme::Dark, TrayIconState::Transcribing) => "resources/tray_transcribing.png",
-        // Light theme uses dark icons
-        (AppTheme::Light, TrayIconState::Idle) => "resources/tray_idle_dark.png",
-        (AppTheme::Light, TrayIconState::Recording) => "resources/tray_recording_dark.png",
-        (AppTheme::Light, TrayIconState::Transcribing) => "resources/tray_transcribing_dark.png",
-        // Colored theme uses pink icons (for Linux)
-        (AppTheme::Colored, TrayIconState::Idle) => "resources/dictx.png",
-        (AppTheme::Colored, TrayIconState::Recording) => "resources/recording.png",
-        (AppTheme::Colored, TrayIconState::Transcribing) => "resources/transcribing.png",
+        // Use Dictx-branded tray icons consistently across themes.
+        (AppTheme::Dark, TrayIconState::Idle)
+        | (AppTheme::Light, TrayIconState::Idle)
+        | (AppTheme::Colored, TrayIconState::Idle) => "resources/dictx.png",
+        (AppTheme::Dark, TrayIconState::Recording)
+        | (AppTheme::Light, TrayIconState::Recording)
+        | (AppTheme::Colored, TrayIconState::Recording) => "resources/recording.png",
+        (AppTheme::Dark, TrayIconState::Transcribing)
+        | (AppTheme::Light, TrayIconState::Transcribing)
+        | (AppTheme::Colored, TrayIconState::Transcribing) => "resources/transcribing.png",
     }
 }
 
@@ -75,6 +73,9 @@ pub fn change_tray_icon(app: &AppHandle, icon: TrayIconState) {
         )
         .expect("failed to set icon"),
     ));
+
+    // Ensure tray remains visible during active push-to-talk usage.
+    let _ = tray.set_visible(true);
 
     // Update menu based on state
     update_tray_menu(app, &icon, None);
@@ -198,7 +199,8 @@ pub fn update_tray_menu(app: &AppHandle, state: &TrayIconState, locale: Option<&
 
     let tray = app.state::<TrayIcon>();
     let _ = tray.set_menu(Some(menu));
-    let _ = tray.set_icon_as_template(true);
+    // Keep original icon colors instead of forcing monochrome template rendering.
+    let _ = tray.set_icon_as_template(false);
 }
 
 fn last_transcript_text(entry: &HistoryEntry) -> &str {

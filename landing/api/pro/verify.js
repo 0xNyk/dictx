@@ -1,6 +1,11 @@
 const POLAR_API_BASE = process.env.POLAR_API_BASE || "https://api.polar.sh/v1";
 const POLAR_ACCESS_TOKEN = process.env.POLAR_ACCESS_TOKEN || "";
+const POLAR_ORGANIZATION_ID = process.env.POLAR_ORGANIZATION_ID || "";
 const ALLOWED_PRODUCT_IDS = (process.env.POLAR_DICTX_PRODUCT_IDS || "")
+  .split(",")
+  .map((value) => value.trim())
+  .filter(Boolean);
+const ALLOWED_BENEFIT_IDS = (process.env.POLAR_DICTX_BENEFIT_IDS || "")
   .split(",")
   .map((value) => value.trim())
   .filter(Boolean);
@@ -13,7 +18,8 @@ const RATE_LIMIT_MAX = Number.parseInt(
   10,
 );
 const MAX_LICENSE_KEY_LENGTH = 128;
-const LICENSE_KEY_PATTERN = /^polar_cl_[A-Za-z0-9]+$/;
+const LICENSE_KEY_PATTERN = /^[A-Za-z0-9_-]{8,128}$/;
+const LEGACY_CHECKOUT_ID_PATTERN = /^polar_cl_[A-Za-z0-9]+$/;
 const requestBuckets = new Map();
 
 const readBody = (req) => {
@@ -37,6 +43,25 @@ const statusLooksPaid = (status, paid) => {
     value === "paid" ||
     value === "completed"
   );
+};
+
+const isLicenseGranted = (payload) => {
+  const status = (payload?.status || "").toLowerCase();
+  if (status !== "granted") {
+    return false;
+  }
+
+  const expiresAt = payload?.expires_at;
+  if (!expiresAt) {
+    return true;
+  }
+
+  const expiresAtMs = Date.parse(expiresAt);
+  if (Number.isNaN(expiresAtMs)) {
+    return false;
+  }
+
+  return expiresAtMs > Date.now();
 };
 
 const getClientId = (req) => {
@@ -83,6 +108,11 @@ module.exports = async (req, res) => {
     return;
   }
 
+  if (!POLAR_ORGANIZATION_ID) {
+    res.status(500).json({ error: "missing_polar_organization_id" });
+    return;
+  }
+
   const clientId = getClientId(req);
   if (isRateLimited(clientId)) {
     res.status(429).json({ error: "rate_limited" });
@@ -103,47 +133,85 @@ module.exports = async (req, res) => {
     return;
   }
 
-  if (!LICENSE_KEY_PATTERN.test(licenseKey)) {
+  if (!LICENSE_KEY_PATTERN.test(licenseKey) && !LEGACY_CHECKOUT_ID_PATTERN.test(licenseKey)) {
     console.warn("pro_verify_invalid_key_format", { clientId });
     res.status(400).json({ error: "invalid_license_key" });
     return;
   }
 
   try {
-    const response = await fetch(
-      `${POLAR_API_BASE}/checkouts/${encodeURIComponent(licenseKey)}`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${POLAR_ACCESS_TOKEN}`,
-          "Content-Type": "application/json",
+    if (LEGACY_CHECKOUT_ID_PATTERN.test(licenseKey)) {
+      const checkoutResponse = await fetch(
+        `${POLAR_API_BASE}/checkouts/${encodeURIComponent(licenseKey)}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${POLAR_ACCESS_TOKEN}`,
+            "Content-Type": "application/json",
+          },
         },
-      },
-    );
+      );
 
-    if (response.status === 404) {
-      res.status(404).json({ active: false });
+      if (checkoutResponse.status === 404) {
+        res.status(404).json({ active: false });
+        return;
+      }
+
+      if (!checkoutResponse.ok) {
+        const text = await checkoutResponse.text();
+        console.warn("pro_verify_polar_checkout_error", {
+          status: checkoutResponse.status,
+          clientId,
+        });
+        res.status(502).json({ error: "polar_api_error", detail: text });
+        return;
+      }
+
+      const checkout = await checkoutResponse.json();
+      const productId =
+        checkout.product_id == null ? "" : String(checkout.product_id);
+      const productAllowed =
+        ALLOWED_PRODUCT_IDS.length === 0 || ALLOWED_PRODUCT_IDS.includes(productId);
+      const paid = statusLooksPaid(checkout.status, checkout.paid);
+
+      res.status(200).json({ active: Boolean(productAllowed && paid), mode: "legacy_checkout" });
       return;
     }
 
-    if (!response.ok) {
-      const text = await response.text();
-      console.warn("pro_verify_polar_api_error", {
-        status: response.status,
+    const validateResponse = await fetch(`${POLAR_API_BASE}/license-keys/validate`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${POLAR_ACCESS_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        key: licenseKey,
+        organization_id: POLAR_ORGANIZATION_ID,
+      }),
+    });
+
+    if (validateResponse.status === 404 || validateResponse.status === 422) {
+      res.status(200).json({ active: false, mode: "license_key" });
+      return;
+    }
+
+    if (!validateResponse.ok) {
+      const text = await validateResponse.text();
+      console.warn("pro_verify_polar_license_error", {
+        status: validateResponse.status,
         clientId,
       });
       res.status(502).json({ error: "polar_api_error", detail: text });
       return;
     }
 
-    const checkout = await response.json();
-    const productId =
-      checkout.product_id == null ? "" : String(checkout.product_id);
-    const productAllowed =
-      ALLOWED_PRODUCT_IDS.length === 0 || ALLOWED_PRODUCT_IDS.includes(productId);
-    const paid = statusLooksPaid(checkout.status, checkout.paid);
+    const license = await validateResponse.json();
+    const benefitId = license?.benefit_id == null ? "" : String(license.benefit_id);
+    const benefitAllowed =
+      ALLOWED_BENEFIT_IDS.length === 0 || ALLOWED_BENEFIT_IDS.includes(benefitId);
+    const granted = isLicenseGranted(license);
 
-    res.status(200).json({ active: Boolean(productAllowed && paid) });
+    res.status(200).json({ active: Boolean(benefitAllowed && granted), mode: "license_key" });
   } catch (error) {
     console.warn("pro_verify_internal_error", { clientId });
     res.status(500).json({

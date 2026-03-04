@@ -101,6 +101,7 @@ fn build_title(text: &str) -> String {
 }
 
 /// Build the full markdown note with YAML frontmatter
+#[allow(clippy::too_many_arguments)]
 fn build_note_content(
     title: &str,
     timestamp: &DateTime<Local>,

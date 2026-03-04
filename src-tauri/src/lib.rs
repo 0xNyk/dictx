@@ -109,6 +109,20 @@ fn show_main_window(app: &AppHandle) {
     }
 }
 
+fn quit_app(app: &AppHandle) {
+    #[cfg(target_os = "macos")]
+    {
+        let _ = app.emit("dictx-before-quit", ());
+        // Work around ONNX Runtime teardown aborts seen during normal process exit.
+        unsafe { libc::_exit(0) };
+    }
+
+    #[cfg(not(target_os = "macos"))]
+    {
+        app.exit(0);
+    }
+}
+
 fn initialize_core_logic(app_handle: &AppHandle) {
     // Note: Enigo (keyboard/mouse simulation) is NOT initialized here.
     // The frontend is responsible for calling the `initialize_enigo` command
@@ -140,7 +154,7 @@ fn initialize_core_logic(app_handle: &AppHandle) {
     // This matches the pattern used for Enigo initialization.
 
     #[cfg(unix)]
-    let signals = Signals::new(&[SIGUSR1, SIGUSR2]).unwrap();
+    let signals = Signals::new([SIGUSR1, SIGUSR2]).unwrap();
     // Set up signal handlers for toggling transcription
     #[cfg(unix)]
     signal_handle::setup_signal_handler(app_handle.clone(), signals);
@@ -171,7 +185,7 @@ fn initialize_core_logic(app_handle: &AppHandle) {
             .unwrap(),
         )
         .show_menu_on_left_click(true)
-        .icon_as_template(true)
+        .icon_as_template(false)
         .on_menu_event(|app, event| match event.id.as_ref() {
             "settings" => {
                 show_main_window(app);
@@ -207,7 +221,7 @@ fn initialize_core_logic(app_handle: &AppHandle) {
                 cancel_current_operation(app);
             }
             "quit" => {
-                app.exit(0);
+                quit_app(app);
             }
             _ => {}
         })
@@ -217,11 +231,21 @@ fn initialize_core_logic(app_handle: &AppHandle) {
 
     // Initialize tray menu with idle state
     utils::update_tray_menu(app_handle, &utils::TrayIconState::Idle, None);
+    utils::change_tray_icon(app_handle, utils::TrayIconState::Idle);
 
-    // Apply show_tray_icon setting
-    let settings = settings::get_settings(app_handle);
-    if !settings.show_tray_icon {
-        tray::set_tray_visibility(app_handle, false);
+    // Keep tray icon visible by default unless explicitly disabled via CLI.
+    tray::set_tray_visibility(app_handle, true);
+
+    #[cfg(target_os = "macos")]
+    {
+        let app_for_reapply = app_handle.clone();
+        // Re-apply icon+visibility shortly after startup to avoid occasional
+        // status-item state glitches during app launch.
+        tauri::async_runtime::spawn(async move {
+            tokio::time::sleep(std::time::Duration::from_millis(350)).await;
+            tray::set_tray_visibility(&app_for_reapply, true);
+            tray::change_tray_icon(&app_for_reapply, tray::TrayIconState::Idle);
+        });
     }
 
     // Refresh tray menu when model state changes
@@ -232,7 +256,7 @@ fn initialize_core_logic(app_handle: &AppHandle) {
 
     // Get the autostart manager and configure based on user setting
     let autostart_manager = app_handle.autolaunch();
-    let settings = settings::get_settings(&app_handle);
+    let settings = settings::get_settings(app_handle);
 
     if settings.autostart_enabled {
         // Enable autostart if user has opted in
@@ -244,6 +268,7 @@ fn initialize_core_logic(app_handle: &AppHandle) {
 
     // Create the recording overlay window (hidden by default)
     utils::create_recording_overlay(app_handle);
+    utils::show_idle_overlay(app_handle);
 }
 
 #[tauri::command]
@@ -314,6 +339,7 @@ pub fn run(cli_args: CliArgs) {
         shortcut::handy_keys::stop_handy_keys_recording,
         trigger_update_check,
         commands::cancel_operation,
+        commands::start_transcription_from_overlay,
         commands::get_app_dir_path,
         commands::get_app_settings,
         commands::get_default_settings,
@@ -432,7 +458,7 @@ pub fn run(cli_args: CliArgs) {
         ))
         .manage(cli_args.clone())
         .setup(move |app| {
-            let mut settings = get_settings(&app.handle());
+            let mut settings = get_settings(app.handle());
 
             // CLI --debug flag overrides debug_mode and log level (runtime-only, not persisted)
             if cli_args.debug {
@@ -460,7 +486,7 @@ pub fn run(cli_args: CliArgs) {
 
             // If start_hidden but tray is disabled, we must show the window
             // anyway. Without a tray icon, the dock is the only way back in.
-            let tray_available = settings.show_tray_icon && !cli_args.no_tray;
+            let tray_available = !cli_args.no_tray;
             if !should_hide || !tray_available {
                 if let Some(main_window) = app_handle.get_webview_window("main") {
                     main_window.show().unwrap();
@@ -475,9 +501,7 @@ pub fn run(cli_args: CliArgs) {
                 api.prevent_close();
                 let _res = window.hide();
 
-                let settings = get_settings(&window.app_handle());
-                let tray_visible =
-                    settings.show_tray_icon && !window.app_handle().state::<CliArgs>().no_tray;
+                let tray_visible = !window.app_handle().state::<CliArgs>().no_tray;
 
                 #[cfg(target_os = "macos")]
                 {
@@ -496,7 +520,7 @@ pub fn run(cli_args: CliArgs) {
             tauri::WindowEvent::ThemeChanged(theme) => {
                 log::info!("Theme changed to: {:?}", theme);
                 // Update tray icon to match new theme, maintaining idle state
-                utils::change_tray_icon(&window.app_handle(), utils::TrayIconState::Idle);
+                utils::change_tray_icon(window.app_handle(), utils::TrayIconState::Idle);
             }
             _ => {}
         })
@@ -505,8 +529,17 @@ pub fn run(cli_args: CliArgs) {
         .expect("error while building tauri application")
         .run(|app, event| {
             #[cfg(target_os = "macos")]
-            if let tauri::RunEvent::Reopen { .. } = &event {
-                show_main_window(app);
+            match &event {
+                tauri::RunEvent::Reopen { .. } => {
+                    show_main_window(app);
+                }
+                tauri::RunEvent::ExitRequested { api, .. } => {
+                    // Route every macOS quit path through the hard-exit workaround
+                    // to avoid ONNX Runtime static teardown aborts.
+                    api.prevent_exit();
+                    quit_app(app);
+                }
+                _ => {}
             }
             let _ = (app, event); // suppress unused warnings on non-macOS
         });

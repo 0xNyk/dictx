@@ -281,14 +281,12 @@ pub fn change_keyboard_implementation_setting(
     settings::write_settings(&app, settings);
 
     // Initialize new implementation if needed (HandyKeys needs state)
-    if new_impl == KeyboardImplementation::HandyKeys {
-        if initialize_handy_keys_with_rollback(&app)? {
-            // Shortcuts already registered during init
-            return Ok(ImplementationChangeResult {
-                success: true,
-                reset_bindings: vec![],
-            });
-        }
+    if new_impl == KeyboardImplementation::HandyKeys && initialize_handy_keys_with_rollback(&app)? {
+        // Shortcuts already registered during init
+        return Ok(ImplementationChangeResult {
+            success: true,
+            reset_bindings: vec![],
+        });
     }
 
     // Register all shortcuts with new implementation, resetting invalid ones
@@ -548,8 +546,10 @@ pub fn change_overlay_position_setting(app: AppHandle, position: String) -> Resu
     settings.overlay_position = parsed;
     settings::write_settings(&app, settings);
 
-    // Update overlay position without recreating window
-    crate::utils::update_overlay_position(&app);
+    match parsed {
+        OverlayPosition::None => crate::utils::hide_recording_overlay(&app),
+        OverlayPosition::Top | OverlayPosition::Bottom => crate::utils::show_idle_overlay(&app),
+    }
 
     Ok(())
 }
@@ -1061,11 +1061,12 @@ pub fn change_app_language_setting(app: AppHandle, language: String) -> Result<(
 #[specta::specta]
 pub fn change_show_tray_icon_setting(app: AppHandle, enabled: bool) -> Result<(), String> {
     let mut settings = settings::get_settings(&app);
-    settings.show_tray_icon = enabled;
+    settings.show_tray_icon = true;
     settings::write_settings(&app, settings);
 
-    // Apply change immediately
-    tray::set_tray_visibility(&app, enabled);
+    // Keep tray icon visible unless disabled via CLI.
+    let _ = enabled;
+    tray::set_tray_visibility(&app, true);
 
     Ok(())
 }

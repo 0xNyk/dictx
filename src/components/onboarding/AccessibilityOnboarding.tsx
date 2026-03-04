@@ -93,6 +93,10 @@ const AccessibilityOnboarding: React.FC<AccessibilityOnboardingProps> = ({
         if (accessibilityGranted && microphoneGranted) {
           await Promise.all([refreshAudioDevices(), refreshOutputDevices()]);
           timeoutRef.current = setTimeout(() => onComplete(), 300);
+        } else {
+          // Keep checking in the background so externally granted permissions
+          // are auto-detected without requiring a manual retry click.
+          startPolling();
         }
       } catch (error) {
         console.error("Failed to check permissions:", error);
@@ -101,6 +105,7 @@ const AccessibilityOnboarding: React.FC<AccessibilityOnboardingProps> = ({
           accessibility: "needed",
           microphone: "needed",
         });
+        startPolling();
       }
     };
 

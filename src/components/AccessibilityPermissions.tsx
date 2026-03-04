@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { type } from "@tauri-apps/plugin-os";
 import {
@@ -25,12 +25,18 @@ const AccessibilityPermissions: React.FC = () => {
   const isMacOS = type() === "macos";
 
   // Check permissions without requesting
-  const checkPermissions = async (): Promise<boolean> => {
-    const hasPermissions: boolean = await checkAccessibilityPermission();
-    setHasAccessibility(hasPermissions);
-    setPermissionState(hasPermissions ? "granted" : "verify");
-    return hasPermissions;
-  };
+  const checkPermissions = useCallback(async (): Promise<boolean> => {
+    try {
+      const hasPermissions: boolean = await checkAccessibilityPermission();
+      setHasAccessibility(hasPermissions);
+      setPermissionState(hasPermissions ? "granted" : "verify");
+      return hasPermissions;
+    } catch (error) {
+      console.error("Error checking accessibility permissions:", error);
+      setPermissionState("verify");
+      return false;
+    }
+  }, []);
 
   // Handle the unified button action based on current state
   const handleButtonClick = async (): Promise<void> => {
@@ -54,13 +60,33 @@ const AccessibilityPermissions: React.FC = () => {
     if (!isMacOS) return;
 
     const initialSetup = async (): Promise<void> => {
-      const hasPermissions: boolean = await checkAccessibilityPermission();
-      setHasAccessibility(hasPermissions);
-      setPermissionState(hasPermissions ? "granted" : "request");
+      const hasPermissions = await checkPermissions();
+      if (!hasPermissions) {
+        setPermissionState("request");
+      }
+    };
+
+    const handleFocus = () => {
+      void checkPermissions();
     };
 
     initialSetup();
-  }, [isMacOS]);
+
+    const interval = window.setInterval(() => {
+      if (!hasAccessibility) {
+        void checkPermissions();
+      }
+    }, 1500);
+
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleFocus);
+
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleFocus);
+    };
+  }, [checkPermissions, hasAccessibility, isMacOS]);
 
   // Skip rendering on non-macOS platforms or if permission is already granted
   if (!isMacOS || hasAccessibility) {

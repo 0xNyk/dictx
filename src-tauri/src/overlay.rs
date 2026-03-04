@@ -279,7 +279,7 @@ pub fn create_recording_overlay(app_handle: &AppHandle) {
             .build()
         {
             Ok(panel) => {
-                let _ = panel.hide();
+                panel.hide();
             }
             Err(e) => {
                 log::error!("Failed to create recording overlay panel: {}", e);
@@ -306,6 +306,11 @@ fn show_overlay_state(app_handle: &AppHandle, state: &str) {
 
         let _ = overlay_window.emit("show-overlay", state);
     }
+}
+
+/// Shows the idle overlay state when overlay UI is enabled.
+pub fn show_idle_overlay(app_handle: &AppHandle) {
+    show_overlay_state(app_handle, "idle");
 }
 
 /// Shows the recording overlay window with fade-in animation
@@ -340,8 +345,14 @@ pub fn update_overlay_position(app_handle: &AppHandle) {
 
 /// Hides the recording overlay window with fade-out animation
 pub fn hide_recording_overlay(app_handle: &AppHandle) {
-    // Always hide the overlay regardless of settings - if setting was changed while recording,
-    // we still want to hide it properly
+    // Keep the idle transcribe control visible when overlay is enabled.
+    let settings = settings::get_settings(app_handle);
+    if settings.overlay_position != OverlayPosition::None {
+        show_idle_overlay(app_handle);
+        return;
+    }
+
+    // Otherwise hide the overlay window entirely.
     if let Some(overlay_window) = app_handle.get_webview_window("recording_overlay") {
         // Emit event to trigger fade-out animation
         let _ = overlay_window.emit("hide-overlay", ());

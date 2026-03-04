@@ -31,6 +31,7 @@
       <nav class="menu" aria-label="Primary">
         <a href="#features">Features</a>
         <a href="#pricing">Pricing</a>
+        <a href="/api/download/macos">Download DMG</a>
         <a
           href="https://github.com/splitlabs/dictx"
           target="_blank"
@@ -56,7 +57,9 @@
         </ul>
         <div class="actions">
           <a class="btn primary" href="/buy">Buy Dictx Pro</a>
-          <a class="btn soft" href="/api/download/macos">Download for macOS</a>
+          <a class="btn soft" href="/api/download/macos"
+            >Download Latest macOS DMG</a
+          >
         </div>
         <p class="meta">
           $29 one-time • signed binaries • auto-updates • macOS / Windows /
@@ -207,12 +210,22 @@
             `landing/vercel.json`.
           </p>
         </details>
+        <details>
+          <summary>Where does the DMG download come from?</summary>
+          <p>
+            `/api/download/macos` resolves the latest GitHub release and
+            redirects to the newest macOS <code>.dmg</code> asset.
+          </p>
+        </details>
         <div class="final-cta">
           <p>
             Keep Free if you like building from source. Upgrade when you want
             signed installers and one-click updates.
           </p>
-          <a class="btn primary" href="/buy">Get Dictx Pro</a>
+          <div class="actions">
+            <a class="btn primary" href="/buy">Get Dictx Pro</a>
+            <a class="btn soft" href="/api/download/macos">Download DMG</a>
+          </div>
         </div>
       </section>
     </main>

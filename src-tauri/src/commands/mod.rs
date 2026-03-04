@@ -5,6 +5,7 @@ pub mod pro;
 pub mod transcription;
 
 use crate::settings::{get_settings, write_settings, AppSettings, LogLevel};
+use crate::signal_handle::send_transcription_input;
 use crate::utils::cancel_current_operation;
 use tauri::{AppHandle, Manager};
 use tauri_plugin_opener::OpenerExt;
@@ -13,6 +14,12 @@ use tauri_plugin_opener::OpenerExt;
 #[specta::specta]
 pub fn cancel_operation(app: AppHandle) {
     cancel_current_operation(&app);
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn start_transcription_from_overlay(app: AppHandle) {
+    send_transcription_input(&app, "transcribe", "overlay");
 }
 
 #[tauri::command]

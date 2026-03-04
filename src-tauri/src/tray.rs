@@ -45,6 +45,15 @@ pub fn get_current_theme(app: &AppHandle) -> AppTheme {
 
 /// Gets the appropriate icon path for the given theme and state
 pub fn get_icon_path(theme: AppTheme, state: TrayIconState) -> &'static str {
+    #[cfg(target_os = "macos")]
+    {
+        let _ = theme;
+        let _ = state;
+        // Keep the branded logo visible in the menu bar at all times.
+        "resources/dictx.png"
+    }
+
+    #[cfg(not(target_os = "macos"))]
     match (theme, state) {
         // Use Dictx-branded tray icons consistently across themes.
         (AppTheme::Dark, TrayIconState::Idle)
@@ -52,10 +61,10 @@ pub fn get_icon_path(theme: AppTheme, state: TrayIconState) -> &'static str {
         | (AppTheme::Colored, TrayIconState::Idle) => "resources/dictx.png",
         (AppTheme::Dark, TrayIconState::Recording)
         | (AppTheme::Light, TrayIconState::Recording)
-        | (AppTheme::Colored, TrayIconState::Recording) => "resources/recording.png",
+        | (AppTheme::Colored, TrayIconState::Recording) => "resources/dictx.png",
         (AppTheme::Dark, TrayIconState::Transcribing)
         | (AppTheme::Light, TrayIconState::Transcribing)
-        | (AppTheme::Colored, TrayIconState::Transcribing) => "resources/transcribing.png",
+        | (AppTheme::Colored, TrayIconState::Transcribing) => "resources/dictx.png",
     }
 }
 
@@ -73,6 +82,8 @@ pub fn change_tray_icon(app: &AppHandle, icon: TrayIconState) {
         )
         .expect("failed to set icon"),
     ));
+    #[cfg(target_os = "macos")]
+    let _ = tray.set_icon_as_template(false);
 
     // Ensure tray remains visible during active push-to-talk usage.
     let _ = tray.set_visible(true);
@@ -199,8 +210,22 @@ pub fn update_tray_menu(app: &AppHandle, state: &TrayIconState, locale: Option<&
 
     let tray = app.state::<TrayIcon>();
     let _ = tray.set_menu(Some(menu));
-    // Keep original icon colors instead of forcing monochrome template rendering.
-    let _ = tray.set_icon_as_template(false);
+    #[cfg(target_os = "macos")]
+    {
+        // Keep icon/template mode aligned with the current app state even when
+        // callers only refresh the menu.
+        let current_icon = state.clone();
+        let icon_path = get_icon_path(get_current_theme(app), current_icon.clone());
+        if let Ok(image) = Image::from_path(
+            app.path()
+                .resolve(icon_path, tauri::path::BaseDirectory::Resource)
+                .expect("failed to resolve"),
+        ) {
+            let _ = tray.set_icon(Some(image));
+        }
+        let _ = tray.set_icon_as_template(false);
+        let _ = tray.set_visible(true);
+    }
 }
 
 fn last_transcript_text(entry: &HistoryEntry) -> &str {

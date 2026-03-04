@@ -1,4 +1,5 @@
 import { listen } from "@tauri-apps/api/event";
+import { invoke } from "@tauri-apps/api/core";
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -11,7 +12,7 @@ import { commands } from "@/bindings";
 import i18n, { syncLanguageFromSettings } from "@/i18n";
 import { getLanguageDirection } from "@/lib/utils/rtl";
 
-type OverlayState = "recording" | "transcribing" | "processing";
+type OverlayState = "idle" | "recording" | "transcribing" | "processing";
 
 const formatElapsed = (seconds: number): string => {
   const m = Math.floor(seconds / 60);
@@ -22,86 +23,124 @@ const formatElapsed = (seconds: number): string => {
 const RecordingOverlay: React.FC = () => {
   const { t } = useTranslation();
   const [isVisible, setIsVisible] = useState(false);
-  const [state, setState] = useState<OverlayState>("recording");
-  const [levels, setLevels] = useState<number[]>(Array(16).fill(0));
+  const [state, setState] = useState<OverlayState>("idle");
+  const BAR_COUNT = 9;
+  const [levels, setLevels] = useState<number[]>(Array(BAR_COUNT).fill(0));
   const smoothedLevelsRef = useRef<number[]>(Array(16).fill(0));
   const [elapsed, setElapsed] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const direction = getLanguageDirection(i18n.language);
 
   useEffect(() => {
+    let unlistenShow: (() => void) | null = null;
+    let unlistenHide: (() => void) | null = null;
+    let unlistenLevel: (() => void) | null = null;
+
+    const stopTimer = () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+
+    const startTimer = () => {
+      stopTimer();
+      setElapsed(0);
+      timerRef.current = setInterval(() => {
+        setElapsed((prev) => prev + 1);
+      }, 1000);
+    };
+
     const setupEventListeners = async () => {
-      // Listen for show-overlay event from Rust
-      const unlistenShow = await listen("show-overlay", async (event) => {
-        // Sync language from settings each time overlay is shown
+      unlistenShow = await listen("show-overlay", async (event) => {
         await syncLanguageFromSettings();
         const overlayState = event.payload as OverlayState;
         setState(overlayState);
         setIsVisible(true);
 
-        // Start timer when recording
         if (overlayState === "recording") {
-          setElapsed(0);
-          timerRef.current = setInterval(() => {
-            setElapsed((prev) => prev + 1);
-          }, 1000);
+          startTimer();
+          return;
         }
-      });
 
-      // Listen for hide-overlay event from Rust
-      const unlistenHide = await listen("hide-overlay", () => {
-        setIsVisible(false);
-        if (timerRef.current) {
-          clearInterval(timerRef.current);
-          timerRef.current = null;
-        }
+        stopTimer();
         setElapsed(0);
       });
 
-      // Listen for mic-level updates
-      const unlistenLevel = await listen<number[]>("mic-level", (event) => {
-        const newLevels = event.payload as number[];
+      unlistenHide = await listen("hide-overlay", () => {
+        stopTimer();
+        setElapsed(0);
+        setState("idle");
+        setIsVisible(false);
+      });
 
-        // Apply smoothing to reduce jitter
+      unlistenLevel = await listen<number[]>("mic-level", (event) => {
+        const newLevels = event.payload as number[];
         const smoothed = smoothedLevelsRef.current.map((prev, i) => {
           const target = newLevels[i] || 0;
-          return prev * 0.7 + target * 0.3; // Smooth transition
+          if (target > prev) {
+            return prev * 0.45 + target * 0.55;
+          }
+          return prev * 0.82 + target * 0.18;
         });
 
         smoothedLevelsRef.current = smoothed;
-        setLevels(smoothed.slice(0, 9));
-      });
+        const center = (BAR_COUNT - 1) / 2;
+        const visualLevels = Array.from({ length: BAR_COUNT }, (_, i) => {
+          const distance = Math.abs(i - center);
+          const bandIndex = Math.min(smoothed.length - 1, Math.floor(distance));
+          const base = smoothed[Math.max(0, 4 - bandIndex)] || 0;
+          const shape = 1 - (distance / center) * 0.35;
+          return Math.max(0, base * shape);
+        });
 
-      // Cleanup function
-      return () => {
-        unlistenShow();
-        unlistenHide();
-        unlistenLevel();
-        if (timerRef.current) {
-          clearInterval(timerRef.current);
-        }
-      };
+        setLevels(visualLevels);
+      });
     };
 
-    setupEventListeners();
+    void setupEventListeners();
+
+    return () => {
+      unlistenShow?.();
+      unlistenHide?.();
+      unlistenLevel?.();
+      stopTimer();
+    };
   }, []);
 
-  const getIcon = () => {
-    if (state === "recording") {
-      return <MicrophoneIcon />;
-    } else {
-      return <TranscriptionIcon />;
-    }
-  };
+  const getIcon = () =>
+    state === "recording" || state === "idle" ? (
+      <MicrophoneIcon />
+    ) : (
+      <TranscriptionIcon />
+    );
 
   return (
     <div
       dir={direction}
-      className={`recording-overlay ${isVisible ? "fade-in" : ""}`}
+      className={`recording-overlay ${isVisible ? "fade-in" : ""} ${
+        state === "idle" ? "is-idle" : ""
+      }`}
     >
-      <div className="overlay-left">{getIcon()}</div>
+      <button
+        className={`overlay-left overlay-action-button ${
+          state !== "idle" ? "is-active" : ""
+        }`}
+        onClick={() => {
+          if (state === "idle") {
+            void invoke("start_transcription_from_overlay");
+          }
+        }}
+        disabled={state !== "idle"}
+        type="button"
+      >
+        {getIcon()}
+      </button>
 
       <div className="overlay-middle">
+        {state === "idle" && (
+          <div className="idle-text">{t("shortcuts.transcribe")}</div>
+        )}
         {state === "recording" && (
           <>
             <div className="bars-container">
@@ -110,9 +149,10 @@ const RecordingOverlay: React.FC = () => {
                   key={i}
                   className="bar"
                   style={{
-                    height: `${Math.min(20, 4 + Math.pow(v, 0.7) * 16)}px`, // Cap at 20px max height
-                    transition: "height 60ms ease-out, opacity 120ms ease-out",
-                    opacity: Math.max(0.2, v * 1.7), // Minimum opacity for visibility
+                    height: `${Math.min(26, 6 + Math.pow(v, 0.58) * 20)}px`,
+                    transition:
+                      "height 110ms cubic-bezier(0.22, 1, 0.36, 1), opacity 150ms ease-out",
+                    opacity: Math.min(1, 0.35 + Math.pow(v, 0.7) * 1.05),
                   }}
                 />
               ))}
@@ -130,14 +170,15 @@ const RecordingOverlay: React.FC = () => {
 
       <div className="overlay-right">
         {state === "recording" && (
-          <div
+          <button
             className="cancel-button"
+            type="button"
             onClick={() => {
-              commands.cancelOperation();
+              void commands.cancelOperation();
             }}
           >
             <CancelIcon />
-          </div>
+          </button>
         )}
       </div>
     </div>

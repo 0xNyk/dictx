@@ -299,9 +299,10 @@ pub fn create_recording_overlay(app_handle: &AppHandle) {
 }
 
 fn show_overlay_state(app_handle: &AppHandle, state: &str) {
-    // Check if overlay should be shown based on position setting
+    // When position is None, only suppress the idle hover.
+    // Active transcription states should still be shown.
     let settings = settings::get_settings(app_handle);
-    if settings.overlay_position == OverlayPosition::None {
+    if settings.overlay_position == OverlayPosition::None && state == "idle" {
         return;
     }
 

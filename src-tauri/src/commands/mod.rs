@@ -7,19 +7,36 @@ pub mod transcription;
 use crate::settings::{get_settings, write_settings, AppSettings, LogLevel};
 use crate::signal_handle::send_transcription_input;
 use crate::utils::cancel_current_operation;
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Manager, Window};
 use tauri_plugin_opener::OpenerExt;
 
-#[tauri::command]
-#[specta::specta]
-pub fn cancel_operation(app: AppHandle) {
-    cancel_current_operation(&app);
+fn require_window(window: &Window, allowed: &[&str]) -> Result<(), String> {
+    let label = window.label();
+    if allowed.contains(&label) {
+        Ok(())
+    } else {
+        Err(format!(
+            "Command not allowed from window '{}'. Allowed windows: {}",
+            label,
+            allowed.join(", ")
+        ))
+    }
 }
 
 #[tauri::command]
 #[specta::specta]
-pub fn start_transcription_from_overlay(app: AppHandle) {
+pub fn cancel_operation(app: AppHandle, window: Window) -> Result<(), String> {
+    require_window(&window, &["main", "recording_overlay"])?;
+    cancel_current_operation(&app);
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn start_transcription_from_overlay(app: AppHandle, window: Window) -> Result<(), String> {
+    require_window(&window, &["recording_overlay"])?;
     send_transcription_input(&app, "transcribe", "overlay");
+    Ok(())
 }
 
 #[tauri::command]
@@ -76,7 +93,9 @@ pub fn set_log_level(app: AppHandle, level: LogLevel) -> Result<(), String> {
 
 #[specta::specta]
 #[tauri::command]
-pub fn open_recordings_folder(app: AppHandle) -> Result<(), String> {
+pub fn open_recordings_folder(app: AppHandle, window: Window) -> Result<(), String> {
+    require_window(&window, &["main"])?;
+
     let app_data_dir = app
         .path()
         .app_data_dir()
@@ -94,7 +113,9 @@ pub fn open_recordings_folder(app: AppHandle) -> Result<(), String> {
 
 #[specta::specta]
 #[tauri::command]
-pub fn open_log_dir(app: AppHandle) -> Result<(), String> {
+pub fn open_log_dir(app: AppHandle, window: Window) -> Result<(), String> {
+    require_window(&window, &["main"])?;
+
     let log_dir = app
         .path()
         .app_log_dir()
@@ -110,7 +131,9 @@ pub fn open_log_dir(app: AppHandle) -> Result<(), String> {
 
 #[specta::specta]
 #[tauri::command]
-pub fn open_app_data_dir(app: AppHandle) -> Result<(), String> {
+pub fn open_app_data_dir(app: AppHandle, window: Window) -> Result<(), String> {
+    require_window(&window, &["main"])?;
+
     let app_data_dir = app
         .path()
         .app_data_dir()

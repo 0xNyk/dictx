@@ -1,5 +1,4 @@
 import { listen } from "@tauri-apps/api/event";
-import { invoke } from "@tauri-apps/api/core";
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -35,6 +34,7 @@ const RecordingOverlay: React.FC = () => {
     let unlistenShow: (() => void) | null = null;
     let unlistenHide: (() => void) | null = null;
     let unlistenLevel: (() => void) | null = null;
+    let disposed = false;
 
     const stopTimer = () => {
       if (timerRef.current) {
@@ -52,7 +52,7 @@ const RecordingOverlay: React.FC = () => {
     };
 
     const setupEventListeners = async () => {
-      unlistenShow = await listen("show-overlay", async (event) => {
+      const showUnlisten = await listen("show-overlay", async (event) => {
         await syncLanguageFromSettings();
         const overlayState = event.payload as OverlayState;
         setState(overlayState);
@@ -66,15 +66,25 @@ const RecordingOverlay: React.FC = () => {
         stopTimer();
         setElapsed(0);
       });
+      if (disposed) {
+        showUnlisten();
+      } else {
+        unlistenShow = showUnlisten;
+      }
 
-      unlistenHide = await listen("hide-overlay", () => {
+      const hideUnlisten = await listen("hide-overlay", () => {
         stopTimer();
         setElapsed(0);
         setState("idle");
         setIsVisible(false);
       });
+      if (disposed) {
+        hideUnlisten();
+      } else {
+        unlistenHide = hideUnlisten;
+      }
 
-      unlistenLevel = await listen<number[]>("mic-level", (event) => {
+      const levelUnlisten = await listen<number[]>("mic-level", (event) => {
         const newLevels = event.payload as number[];
         const smoothed = smoothedLevelsRef.current.map((prev, i) => {
           const target = newLevels[i] || 0;
@@ -96,11 +106,17 @@ const RecordingOverlay: React.FC = () => {
 
         setLevels(visualLevels);
       });
+      if (disposed) {
+        levelUnlisten();
+      } else {
+        unlistenLevel = levelUnlisten;
+      }
     };
 
     void setupEventListeners();
 
     return () => {
+      disposed = true;
       unlistenShow?.();
       unlistenHide?.();
       unlistenLevel?.();
@@ -128,7 +144,7 @@ const RecordingOverlay: React.FC = () => {
         }`}
         onClick={() => {
           if (state === "idle") {
-            void invoke("start_transcription_from_overlay");
+            void commands.startTranscriptionFromOverlay();
           }
         }}
         disabled={state !== "idle"}

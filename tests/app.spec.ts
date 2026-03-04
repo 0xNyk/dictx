@@ -1,18 +1,21 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Dictx App", () => {
-  test("dev server responds", async ({ page }) => {
-    // Just verify the dev server is running and responds
-    const response = await page.goto("/");
-    expect(response?.status()).toBe(200);
+  test("dev server responds with root document", async ({ page }) => {
+    const response = await page.goto("/", { waitUntil: "domcontentloaded" });
+    await expect
+      .poll(() => response?.status(), {
+        message: "Root route should return HTTP 200",
+      })
+      .toBe(200);
   });
 
-  test("page has html structure", async ({ page }) => {
-    await page.goto("/");
+  test("page renders shell structure", async ({ page }) => {
+    await page.goto("/", { waitUntil: "domcontentloaded" });
 
-    // Verify basic HTML structure exists
-    const html = await page.content();
-    expect(html).toContain("<html");
-    expect(html).toContain("<body");
+    await expect(page.locator("html")).toHaveCount(1);
+    await expect(page.locator("body")).toHaveCount(1);
+    await expect(page.locator("#root")).toHaveCount(1);
+    await expect(page).toHaveTitle(/dictx/i);
   });
 });

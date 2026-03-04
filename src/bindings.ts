@@ -401,8 +401,21 @@ async triggerUpdateCheck() : Promise<Result<null, string>> {
     else return { status: "error", error: e  as any };
 }
 },
-async cancelOperation() : Promise<void> {
-    await TAURI_INVOKE("cancel_operation");
+async cancelOperation() : Promise<Result<null, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("cancel_operation") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async startTranscriptionFromOverlay() : Promise<Result<null, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("start_transcription_from_overlay") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
 },
 async getAppDirPath() : Promise<Result<string, string>> {
     try {

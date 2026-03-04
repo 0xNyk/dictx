@@ -23,6 +23,10 @@ jobs:
           cp src/managers/transcription_mock.rs src/managers/transcription.rs
           sed -i '/^transcribe-rs/d' Cargo.toml
 
+      - name: Run Clippy (deny warnings)
+        working-directory: src-tauri
+        run: cargo clippy -- -D warnings
+
       - name: Run Rust tests
         working-directory: src-tauri
         run: cargo test
